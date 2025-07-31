@@ -1,0 +1,53 @@
+{
+  "name": "@bard/input-tag",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "A declarative, zero-dependency, framework-agnostic custom element for tag input with autocomplete",
+  "main": "src/input-tag.js",
+  "module": "src/input-tag.js",
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "test": "web-test-runner",
+    "test:watch": "web-test-runner --watch",
+    "test:chrome": "web-test-runner --playwright --browsers chromium",
+    "test:chromium": "web-test-runner --playwright --browsers chromium",
+    "test:firefox": "web-test-runner --concurrency 1 --playwright --browsers firefox",
+    "test:webkit": "web-test-runner --playwright --browsers webkit",
+    "test:all": "web-test-runner --concurrency 1 --playwright --browsers chromium firefox webkit",
+    "test:coverage": "npm run test:chrome",
+    "test:ci": "npm run test:all -- --fail-only"
+  },
+  "keywords": [
+    "input",
+    "tag",
+    "taggle",
+    "autocomplete",
+    "custom-element",
+    "web-components",
+    "form",
+    "declarative",
+    "framework-agnostic"
+  ],
+  "author": "Bot & Rose",
+  "license": "MIT",
+  "devDependencies": {
+    "@esm-bundle/chai": "^4.3.4",
+    "@open-wc/testing": "^4.0.0",
+    "@web/test-runner": "^0.18.0",
+    "@web/test-runner-playwright": "^0.11.1",
+    "sinon": "^21.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/botandrose/input-tag.git"
+  },
+  "bugs": {
+    "url": "https://github.com/botandrose/input-tag/issues"
+  },
+  "homepage": "https://github.com/botandrose/input-tag#readme",
+  "dependencies": {
+    "autocompleter": "^9.3.2"
+  }
+}

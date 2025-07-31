@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Input Tag Example</title>
+</head>
+<body>
+    <h1>@bard/input-tag Example</h1>
+    
+    <form>
+        <h2>Multiple Tags</h2>
+        <input-tag name="tags" multiple>
+            <tag-option value="javascript">JavaScript</tag-option>
+            <tag-option value="typescript">TypeScript</tag-option>
+        </input-tag>
+        
+        <h2>Single Tag</h2>
+        <input-tag name="category">
+            <tag-option value="frontend">Frontend</tag-option>
+        </input-tag>
+        
+        <h2>With Autocomplete</h2>
+        <input-tag name="frameworks" list="suggestions" multiple></input-tag>
+        <datalist id="suggestions">
+            <option value="react">React</option>
+            <option value="vue">Vue</option>
+            <option value="angular">Angular</option>
+            <option value="svelte">Svelte</option>
+        </datalist>
+        
+        <br><br>
+        <button type="button" onclick="showValues()">Show Values</button>
+        <button type="reset">Reset Form</button>
+    </form>
+    
+    <div id="output"></div>
+    
+    <script type="importmap">
+        {
+            "imports": {
+                "autocompleter": "https://unpkg.com/autocompleter@9.3.2/autocomplete.es.js"
+            }
+        }
+    </script>
+    <script type="module" src="./src/input-tag.js"></script>
+    <script>
+        function showValues() {
+            const output = document.getElementById('output');
+            const formData = new FormData(document.querySelector('form'));
+            let html = '<h3>Form Values:</h3><ul>';
+            for (let [key, value] of formData.entries()) {
+                html += `<li><strong>${key}:</strong> ${value}</li>`;
+            }
+            html += '</ul>';
+            output.innerHTML = html;
+        }
+        
+        // Listen for changes
+        document.addEventListener('change', (e) => {
+            if (e.target.tagName === 'INPUT-TAG') {
+                console.log('Tag changed:', e.target.name, e.target.value);
+            }
+        });
+        
+        document.addEventListener('update', (e) => {
+            if (e.target.tagName === 'INPUT-TAG') {
+                console.log('Tag updated:', e.detail);
+            }
+        });
+    </script>
+</body>
+</html>
