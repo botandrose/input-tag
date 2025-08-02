@@ -31,7 +31,7 @@ describe('Edge Cases', () => {
       const inputTag = await setupInputTag('<input-tag name="tags" multiple></input-tag>')
       const input = inputTag._taggleInputTarget
 
-      simulateInput(input, '')
+      await simulateInput(input, '')
       simulateKeydown(input, KEYCODES.ENTER)
       await waitForUpdate()
 
@@ -43,7 +43,7 @@ describe('Edge Cases', () => {
       const input = inputTag._taggleInputTarget
       const button = inputTag.buttonTarget
 
-      simulateInput(input, '')
+      await simulateInput(input, '')
       button.click()
       await waitForUpdate()
 
@@ -333,11 +333,11 @@ describe('Edge Cases', () => {
       const input = inputTag._taggleInputTarget
 
       // Simulate rapid typing and entering
-      simulateInput(input, 'rapid1')
+      await simulateInput(input, 'rapid1')
       simulateKeydown(input, KEYCODES.ENTER)
-      simulateInput(input, 'rapid2')
+      await simulateInput(input, 'rapid2')
       simulateKeydown(input, KEYCODES.ENTER)
-      simulateInput(input, 'rapid3')
+      await simulateInput(input, 'rapid3')
       simulateKeydown(input, KEYCODES.ENTER)
 
       await waitForUpdate(100)
@@ -494,7 +494,7 @@ describe('Edge Cases', () => {
       const input = inputTag._taggleInputTarget
 
       // Simulate Android keyboard behavior (keyCode 229)
-      simulateInput(input, 'android-tag,')
+      await simulateInput(input, 'android-tag,')
       simulateKeyup(input, 229) // Android composite keycode
 
       await waitForUpdate()
@@ -513,7 +513,7 @@ describe('Edge Cases', () => {
       const input = inputTag._taggleInputTarget
 
       // Simulate Android backspace with empty input
-      simulateInput(input, '')
+      await simulateInput(input, '')
       simulateKeyup(input, 229)
 
       await waitForUpdate()

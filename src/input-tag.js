@@ -523,6 +523,13 @@ class InputTag extends HTMLElement {
     return this._taggle.getTagValues()
   }
 
+  // Private getter for testing autocomplete suggestions
+  get _autocompleteSuggestions() {
+    if (!this.autocompleteContainerTarget) return []
+    const items = this.autocompleteContainerTarget.querySelectorAll('.ui-menu-item')
+    return Array.from(items).map(item => item.textContent.trim())
+  }
+
   addAt(tag, index) {
     if (!this._taggle) return
     this._taggle.add(tag, index)

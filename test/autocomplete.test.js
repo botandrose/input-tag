@@ -116,38 +116,47 @@ describe('Autocomplete', () => {
       const inputTag = await setupAutocompleteTest()
       const input = inputTag._taggleInputTarget
 
-      // The filtering logic is in the autocomplete setup
-      // We can test this by checking the options array and simulating what the filter would do
-      const filterFunction = (text) => {
-        return inputTag.options.filter(tag => tag.toLowerCase().includes(text.toLowerCase()))
-      }
+      // Test 're' shows only 'react'
+      await simulateInput(input, 're')
+      expect(inputTag._autocompleteSuggestions).to.deep.equal(['react'])
 
-      expect(filterFunction('re')).to.deep.equal(['react'])
-      expect(filterFunction('e')).to.deep.equal(['react', 'vue', 'svelte', 'backbone'])
-      expect(filterFunction('ang')).to.deep.equal(['angular'])
-      expect(filterFunction('xyz')).to.deep.equal([])
+      // Test 'e' shows multiple matches
+      await simulateInput(input, 'e')
+      expect(inputTag._autocompleteSuggestions).to.include.members(['react', 'vue', 'svelte', 'backbone'])
+
+      // Test 'ang' shows only 'angular'
+      await simulateInput(input, 'ang')
+      expect(inputTag._autocompleteSuggestions).to.deep.equal(['angular'])
+
+      // Test 'xyz' shows no matches
+      await simulateInput(input, 'xyz')
+      expect(inputTag._autocompleteSuggestions).to.have.length(0)
     })
 
     it('should handle case-insensitive filtering', async () => {
       const inputTag = await setupAutocompleteTest()
+      const input = inputTag._taggleInputTarget
 
-      const filterFunction = (text) => {
-        return inputTag.options.filter(tag => tag.toLowerCase().includes(text.toLowerCase()))
-      }
+      // Test uppercase 'REACT' shows 'react'
+      await simulateInput(input, 'REACT')
+      expect(inputTag._autocompleteSuggestions).to.deep.equal(['react'])
 
-      expect(filterFunction('REACT')).to.deep.equal(['react'])
-      expect(filterFunction('VuE')).to.deep.equal(['vue'])
+      // Test mixed case 'VuE' shows 'vue'
+      await simulateInput(input, 'VuE')
+      expect(inputTag._autocompleteSuggestions).to.deep.equal(['vue'])
     })
 
     it('should filter with partial matches', async () => {
       const inputTag = await setupAutocompleteTest()
+      const input = inputTag._taggleInputTarget
 
-      const filterFunction = (text) => {
-        return inputTag.options.filter(tag => tag.toLowerCase().includes(text.toLowerCase()))
-      }
+      // Test 'a' shows tags containing 'a'
+      await simulateInput(input, 'a')
+      expect(inputTag._autocompleteSuggestions).to.include.members(['react', 'angular', 'backbone'])
 
-      expect(filterFunction('a')).to.deep.equal(['react', 'angular', 'backbone'])
-      expect(filterFunction('ck')).to.deep.equal(['backbone'])
+      // Test 'ck' shows only 'backbone'
+      await simulateInput(input, 'ck')
+      expect(inputTag._autocompleteSuggestions).to.deep.equal(['backbone'])
     })
 
     it('should exclude already-entered tags from autocomplete suggestions', async () => {
@@ -162,20 +171,13 @@ describe('Autocomplete', () => {
       expect(getTagValues(inputTag)).to.deep.equal(['react', 'vue'])
 
       // Type 'e' which should trigger autocomplete
-      simulateInput(input, 'e')
-
-      // Wait for autocomplete to populate
-      await new Promise(resolve => setTimeout(resolve, 50))
-
-      // Check the autocomplete menu items
-      const autocompleteItems = inputTag.autocompleteContainerTarget.querySelectorAll('.ui-menu-item')
-      const suggestionTexts = Array.from(autocompleteItems).map(item => item.textContent.trim())
+      await simulateInput(input, 'e')
 
       // Should show 'svelte' and 'backbone' but NOT 'react' or 'vue'
-      expect(suggestionTexts).to.include('svelte')
-      expect(suggestionTexts).to.include('backbone')
-      expect(suggestionTexts).to.not.include('react')
-      expect(suggestionTexts).to.not.include('vue')
+      expect(inputTag._autocompleteSuggestions).to.include('svelte')
+      expect(inputTag._autocompleteSuggestions).to.include('backbone')
+      expect(inputTag._autocompleteSuggestions).to.not.include('react')
+      expect(inputTag._autocompleteSuggestions).to.not.include('vue')
     })
   })
 
@@ -212,7 +214,7 @@ describe('Autocomplete', () => {
       await waitForElement(inputTag, '_taggle')
 
       const input = inputTag._taggleInputTarget
-      simulateInput(input, 'react')
+      await simulateInput(input, 'react')
 
       // Simulate autocomplete selection
       inputTag.add('react')

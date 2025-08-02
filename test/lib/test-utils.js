@@ -66,10 +66,11 @@ export function simulateKeyup(element, keyCode, options = {}) {
   return event
 }
 
-export function simulateInput(element, value) {
+export async function simulateInput(element, value) {
   element.value = value
   const event = new Event('input', { bubbles: true })
   element.dispatchEvent(event)
+  await new Promise(resolve => setTimeout(resolve, 20))
   return event
 }
 
