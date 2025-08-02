@@ -9,42 +9,26 @@
 // Default options //
 /////////////////////
 
-var noop = function() {};
-var retTrue = function() {
-  return true;
-};
-var BACKSPACE = 8;
-var DELETE = 46;
-var COMMA = 188;
-var TAB = 9;
-var ENTER = 13;
+const noop = () => {};
+const retTrue = () => true;
+const BACKSPACE = 8;
+const DELETE = 46;
+const COMMA = 188;
+const TAB = 9;
+const ENTER = 13;
 
-var DEFAULTS = {
-
-
-
+const DEFAULTS = {
   /**
    * Clear the input value when blurring.
-   *
    * @type {Boolean}
    */
   clearOnBlur: true,
-
 
   /**
    * Class added to the container div when focused
    * @type {String}
    */
   containerFocusClass: 'active',
-
-  /**
-   * Tags that should be preloaded in the div on load
-   * @type {Array}
-   */
-  tags: [],
-
-
-
 
   /**
    * Spaces will be removed from the tags by default
@@ -57,7 +41,6 @@ var DEFAULTS = {
    * @type {Number}
    */
   maxTags: null,
-
 
   /**
    * Placeholder string to be placed in an empty taggle field
@@ -77,23 +60,6 @@ var DEFAULTS = {
    * @type {Boolean}
    */
   preserveCase: false,
-
-  // @todo bind callback hooks to instance
-
-  /**
-   * Function hook called with the to-be-added input DOM element.
-   *
-   * @param  {HTMLElement} input The input element to be added
-   */
-  inputFormatter: noop,
-
-  /**
-   * Function hook called with the to-be-added tag DOM element.
-   * Use this function to edit the list item before it is appended
-   * to the DOM
-   * @param  {HTMLElement} li The list item to be added
-   */
-  tagFormatter: noop,
 
   /**
    * Function hook called before a tag is added. Return false
@@ -180,13 +146,13 @@ class Taggle {
    */
   _setMeasurements() {
     this.measurements.container.rect = this.container.getBoundingClientRect();
-    this.measurements.container.style = window.getComputedStyle(this.container);
+    const style = window.getComputedStyle(this.container);
+    this.measurements.container.style = style;
 
-    var style = this.measurements.container.style;
-    var lpad = parseInt(style['padding-left'] || style.paddingLeft, 10);
-    var rpad = parseInt(style['padding-right'] || style.paddingRight, 10);
-    var lborder = parseInt(style['border-left-width'] || style.borderLeftWidth, 10);
-    var rborder = parseInt(style['border-right-width'] || style.borderRightWidth, 10);
+    const lpad = parseInt(style['padding-left'] || style.paddingLeft, 10);
+    const rpad = parseInt(style['padding-right'] || style.paddingRight, 10);
+    const lborder = parseInt(style['border-left-width'] || style.borderLeftWidth, 10);
+    const rborder = parseInt(style['border-right-width'] || style.borderRightWidth, 10);
 
     this.measurements.container.padding = lpad + rpad + lborder + rborder;
   }
@@ -195,8 +161,6 @@ class Taggle {
    * Setup the div container for tags to be entered
    */
   _setupTextarea() {
-    var fontSize;
-
     this.input.type = 'text';
     // Make sure no left/right padding messes with the input sizing
     this.input.style.paddingLeft = 0;
@@ -211,12 +175,6 @@ class Taggle {
       this._inputPosition = _clamp(this._inputPosition + 1, 0, this.tag.values.length);
     })
 
-    if (this.settings.tags.length) {
-      for (var i = 0, len = this.settings.tags.length; i < len; i++) {
-        var taggle = this._createTag(this.settings.tags[i], this.tag.values.length);
-        this.container.appendChild(taggle);
-      }
-    }
 
     if (this.placeholder) {
       this._hidePlaceholder();
@@ -229,36 +187,25 @@ class Taggle {
       }
     }
 
-    var formattedInput = this.settings.inputFormatter(this.input);
-    if (formattedInput) {
-      this.input = formattedInput;
-    }
 
     const div = document.createElement('div');
     div.appendChild(this.input);
     div.appendChild(this.sizer);
     this.inputContainer.appendChild(div);
-    fontSize = window.getComputedStyle(this.input).fontSize;
+    const fontSize = window.getComputedStyle(this.input).fontSize;
     this.sizer.style.fontSize = fontSize;
-  };
+  }
 
   /**
    * Attaches neccessary events
    */
   _attachEvents() {
-    var self = this;
-
     if (this._eventsAttached) {
       return false;
     }
-
     this._eventsAttached = true;
 
-    function containerClick() {
-      self.input.focus();
-    }
-
-    this._handleContainerClick = containerClick.bind(this);
+    this._handleContainerClick = () => this.input.focus();
     this.container.addEventListener('click', this._handleContainerClick);
 
     this._handleFocus = this._setFocusStateForContainer.bind(this);
@@ -272,15 +219,12 @@ class Taggle {
     this.input.addEventListener('keyup', this._handleKeyup);
 
     return true;
-  };
+  }
 
   _detachEvents() {
     if (!this._eventsAttached) {
       return false;
     }
-
-    var self = this;
-
     this._eventsAttached = false;
 
     this.container.removeEventListener('click', this._handleContainerClick);
@@ -290,28 +234,19 @@ class Taggle {
     this.input.removeEventListener('keyup', this._handleKeyup);
 
     return true;
-  };
-
-  /**
-   * Resizes the hidden input where user types to fill in the
-   * width of the div
-   */
-  _fixInputWidth() {
-    this._setMeasurements();
-    this._setInputWidth();
-  };
+  }
 
   /**
    * Returns whether or not the specified tag text can be added
-   * @param  {Event} e event causing the potentially added tag
-   * @param  {String} text tag value
+   * @param {Event} e event causing the potentially added tag
+   * @param {String} text tag value
    * @return {Boolean}
    */
   _canAdd(e, text) {
     if (!text) {
       return false;
     }
-    var limit = this.settings.maxTags;
+    const limit = this.settings.maxTags;
     if (limit !== null && limit <= this.getTagValues().length) {
       return false;
     }
@@ -321,24 +256,18 @@ class Taggle {
     }
 
     // Check for duplicates
-    if (this.tag.values.indexOf(text) !== -1) {
-      return false;
-    }
-
-    return true;
-  };
-
+    return this.tag.values.indexOf(text) === -1;
+  }
 
   /**
    * Appends tag with its corresponding input to the list
-   * @param  {Event} e
-   * @param  {String} text
-   * @param  {Number} index
+   * @param {Event} e
+   * @param {String} text
+   * @param {Number} index
    */
   _add(e, text, index) {
-    var self = this;
-    var values = text || '';
-    var delimiter = ',';
+    let values = text || '';
+    const delimiter = ',';
 
     if (typeof text !== 'string') {
       values = this.input.value;
@@ -361,10 +290,9 @@ class Taggle {
         return;
       }
 
-      var currentTagLength = this.tag.values.length;
-      var tagIndex = _clamp(index || currentTagLength, 0, currentTagLength);
-      var tagOption = this._createTag(val, tagIndex);
-      var tagOptions = this.container.children;
+      const currentTagLength = this.tag.values.length;
+      const tagIndex = _clamp(index || currentTagLength, 0, currentTagLength);
+      const tagOption = this._createTag(val, tagIndex);
       this.container.append(tagOption);
 
       val = this.tag.values[tagIndex];
@@ -372,36 +300,37 @@ class Taggle {
       this.settings.onTagAdd(e, val);
 
       this.input.value = '';
-      this._fixInputWidth();
+      this._setMeasurements();
+      this._setInputWidth();
       this._setFocusStateForContainer();
     });
-  };
+  }
 
   /**
    * Removes last tag if it has already been probed
-   * @param  {Event} e
+   * @param {Event} e
    */
   _checkPrevOrNextTag(e) {
-
-    var taggles = this.container.querySelectorAll('tag-option');
-    var prevTagIndex = _clamp(this._inputPosition - 1, 0, taggles.length - 1);
-    var nextTagIndex = _clamp(this._inputPosition, 0, taggles.length - 1);
-    var index = prevTagIndex;
+    const taggles = this.container.querySelectorAll('tag-option');
+    const prevTagIndex = _clamp(this._inputPosition - 1, 0, taggles.length - 1);
+    const nextTagIndex = _clamp(this._inputPosition, 0, taggles.length - 1);
+    let index = prevTagIndex;
 
     if (e.keyCode === DELETE) {
       index = nextTagIndex;
     }
 
-    var targetTaggle = taggles[index];
-    var hotClass = 'taggle_hot';
-    var isDeleteOrBackspace = [BACKSPACE, DELETE].indexOf(e.keyCode) !== -1;
+    const targetTaggle = taggles[index];
+    const hotClass = 'taggle_hot';
+    const isDeleteOrBackspace = [BACKSPACE, DELETE].includes(e.keyCode);
 
     // prevent holding backspace from deleting all tags
     if (this.input.value === '' && isDeleteOrBackspace && !this._backspacePressed) {
       if (targetTaggle.classList.contains(hotClass)) {
         this._backspacePressed = true;
         this._remove(targetTaggle, e);
-        this._fixInputWidth();
+        this._setMeasurements();
+        this._setInputWidth();
         this._setFocusStateForContainer();
       }
       else {
@@ -411,57 +340,40 @@ class Taggle {
     else if (targetTaggle.classList.contains(hotClass)) {
       targetTaggle.classList.remove(hotClass);
     }
-  };
+  }
 
   /**
    * Setter for the hidden input.
    * @param {Number} width
    */
   _setInputWidth() {
-    var width = this.sizer.getBoundingClientRect().width;
-    var max = this.measurements.container.rect.width - this.measurements.container.padding;
-    var size = parseInt(this.sizer.style.fontSize, 10);
+    const width = this.sizer.getBoundingClientRect().width;
+    const max = this.measurements.container.rect.width - this.measurements.container.padding;
+    const size = parseInt(this.sizer.style.fontSize, 10);
 
     // 1.5 just seems to be a good multiplier here
-    var newWidth = Math.round(_clamp(width + (size * 1.5), 10, max));
+    const newWidth = Math.round(_clamp(width + (size * 1.5), 10, max));
 
-    this.input.style.width = newWidth + 'px';
-  };
-
-
-  /**
-   * Checks whether or not the key pressed is acceptable
-   * @param  {Number}  key code
-   * @return {Boolean}
-   */
-  _isConfirmKey(key) {
-    var confirmKey = false;
-
-    if (this.settings.submitKeys.indexOf(key) > -1) {
-      confirmKey = true;
-    }
-
-    return confirmKey;
-  };
-
-  // Event handlers
+    this.input.style.width = `${newWidth}px`;
+  }
 
   /**
    * Handles focus state of div container.
    */
   _setFocusStateForContainer() {
-    this._fixInputWidth();
+    this._setMeasurements();
+    this._setInputWidth();
 
     if (!this.container.classList.contains(this.settings.containerFocusClass)) {
       this.container.classList.add(this.settings.containerFocusClass);
     }
 
     this._hidePlaceholder();
-  };
+  }
 
   /**
    * Runs all the events that need to happen on a blur
-   * @param  {Event} e
+   * @param {Event} e
    */
   _blurEvent(e) {
     if (this.container.classList.contains(this.settings.containerFocusClass)) {
@@ -476,15 +388,14 @@ class Taggle {
     if (!this.tag.values.length && !this.input.value) {
       this._showPlaceholder();
     }
-  };
+  }
 
   /**
    * Runs all the events that need to run on keydown
-   * @param  {Event} e
+   * @param {Event} e
    */
   _keydownEvents(e) {
-
-    var key = e.keyCode;
+    const key = e.keyCode;
     this.pasting = false;
 
     this._setInputWidth();
@@ -493,7 +404,7 @@ class Taggle {
       this.pasting = true;
     }
 
-    if (this._isConfirmKey(key) && this.input.value !== '') {
+    if (this.settings.submitKeys.includes(key) && this.input.value !== '') {
       this._confirmValidTagEvent(e);
       return;
     }
@@ -501,14 +412,13 @@ class Taggle {
     if (this.tag.values.length) {
       this._checkPrevOrNextTag(e);
     }
-  };
+  }
 
   /**
    * Runs all the events that need to run on keyup
-   * @param  {Event} e
+   * @param {Event} e
    */
   _keyupEvents(e) {
-
     this._backspacePressed = false;
 
     this.sizer.textContent = this.input.value;
@@ -524,106 +434,85 @@ class Taggle {
       this._add(e);
       this.pasting = false;
     }
-  };
+  }
 
   /**
    * Confirms the inputted value to be converted to a tag
-   * @param  {Event} e
+   * @param {Event} e
    */
   _confirmValidTagEvent(e) {
     // prevents from jumping out of textarea
     e.preventDefault();
 
     this._add(e, null, this._inputPosition);
-  };
+  }
 
   _createTag(text, index) {
-    var tagOption = document.createElement('tag-option');
+    const tagOption = document.createElement('tag-option');
 
     text = this._formatTag(text);
     tagOption.textContent = text;
     tagOption.setAttribute('value', text);
 
-    var formatted = this.settings.tagFormatter(tagOption);
-
-    if (typeof formatted !== 'undefined') {
-      tagOption = formatted;
-    }
-
     if (!(tagOption instanceof HTMLElement) || !(tagOption.localName === 'tag-option' || tagOption.tagName === 'TAG-OPTION')) {
       throw new Error('tagFormatter must return an tag-option element');
     }
-
 
     this.tag.values.splice(index, 0, text);
     this.tag.elements.splice(index, 0, tagOption);
     this._inputPosition = _clamp(this._inputPosition + 1, 0, this.tag.values.length);
 
     return tagOption;
-  };
+  }
 
   _showPlaceholder() {
     if (this.placeholder) {
       this.placeholder.style.opacity = 1;
       this.placeholder.setAttribute('aria-hidden', 'false');
     }
-  };
+  }
 
   _hidePlaceholder() {
     if (this.placeholder) {
       this.placeholder.style.opacity = 0;
       this.placeholder.setAttribute('aria-hidden', 'true');
     }
-  };
+  }
 
   /**
    * Removes tag from the tags collection
-   * @param  {tagOption} tagOption List item to remove
-   * @param  {Event} e
+   * @param {HTMLElement} tagOption List item to remove
+   * @param {Event} e
    */
   _remove(tagOption, e) {
-    var self = this;
-    var text;
-    var elem;
-    var index;
-
     if (tagOption.tagName.toLowerCase() !== 'tag-option') {
       tagOption = tagOption.parentNode;
     }
 
-    elem = (tagOption.tagName.toLowerCase() === 'a') ? tagOption.parentNode : tagOption;
-    index = this.tag.elements.indexOf(elem);
+    const index = this.tag.elements.indexOf(tagOption);
+    const text = this.tag.values[index];
 
-    text = this.tag.values[index];
+    const done = (error) => {
+      if (error) return;
 
-    function done(error) {
-      if (error) {
-        return;
+      tagOption.remove();
+
+      this.tag.elements.splice(index, 1);
+      this.tag.values.splice(index, 1);
+
+      this.settings.onTagRemove(e, text);
+
+      if (index < this._inputPosition) {
+        this._inputPosition = _clamp(this._inputPosition - 1, 0, this.tag.values.length);
       }
 
-      tagOption.remove()
+      this._setFocusStateForContainer();
+    };
 
-      // Going to assume the indicies match for now
-      self.tag.elements.splice(index, 1);
-      self.tag.values.splice(index, 1);
-
-      self.settings.onTagRemove(e, text);
-
-      if (index < self._inputPosition) {
-        self._inputPosition = _clamp(self._inputPosition - 1, 0, self.tag.values.length);
-      }
-
-      self._setFocusStateForContainer();
+    if (this.settings.onBeforeTagRemove(e, text, done)) {
+      done();
     }
-
-    var ret = this.settings.onBeforeTagRemove(e, text, done);
-
-    if (!ret) {
-      return;
-    }
-
-    done();
-  };
+  }
 
   /**
    * Format the text for a tag
@@ -632,29 +521,29 @@ class Taggle {
    */
   _formatTag(text) {
     return this.settings.preserveCase ? text : text.toLowerCase();
-  };
+  }
 
   // @todo
   // @deprecated use getTags().values
   getTagValues() {
-    return [].slice.apply(this.tag.values);
-  };
+    return [...this.tag.values];
+  }
 
   getInput() {
     return this.input;
-  };
+  }
 
   getContainer() {
     return this.container;
-  };
+  }
 
   add(text, index) {
-    var isArr = Array.isArray(text);
+    const isArr = Array.isArray(text);
 
     if (isArr) {
-      var startingIndex = index;
+      let startingIndex = index;
 
-      for (var i = 0, len = text.length; i < len; i++) {
+      for (let i = 0, len = text.length; i < len; i++) {
         if (typeof text[i] === 'string') {
           this._add(null, text[i], startingIndex);
 
@@ -669,14 +558,14 @@ class Taggle {
     }
 
     return this;
-  };
+  }
 
   remove(text, all) {
-    var len = this.tag.values.length - 1;
-    var found = false;
+    let len = this.tag.values.length - 1;
+    let found = false;
 
     while (len > -1) {
-      var tagText = this.tag.values[len];
+      const tagText = this.tag.values[len];
 
       if (tagText === text) {
         found = true;
@@ -691,37 +580,41 @@ class Taggle {
     }
 
     return this;
-  };
+  }
 
   removeAll() {
-    for (var i = this.tag.values.length - 1; i >= 0; i--) {
+    for (let i = this.tag.values.length - 1; i >= 0; i--) {
       this._remove(this.tag.elements[i]);
     }
 
     this._showPlaceholder();
 
     return this;
-  };
-  enable() {
-    var buttons = [].slice.call(this.container.querySelectorAll('button'));
-    var inputs = [].slice.call(this.container.querySelectorAll('input'));
+  }
 
-    buttons.concat(inputs).forEach(function(el) {
-      el.removeAttribute('disabled');
+  _setDisabledState(disabled) {
+    const elements = [
+      ...this.container.querySelectorAll('button'),
+      ...this.container.querySelectorAll('input')
+    ];
+
+    elements.forEach((el) => {
+      if (disabled) {
+        el.setAttribute('disabled', '');
+      } else {
+        el.removeAttribute('disabled');
+      }
     });
 
     return this;
-  };
+  }
+
+  enable() {
+    return this._setDisabledState(false);
+  }
 
   disable() {
-    var buttons = [].slice.call(this.container.querySelectorAll('button'));
-    var inputs = [].slice.call(this.container.querySelectorAll('input'));
-
-    buttons.concat(inputs).forEach(function(el) {
-      el.setAttribute('disabled', '');
-    });
-
-    return this;
+    return this._setDisabledState(true);
   }
 }
 
