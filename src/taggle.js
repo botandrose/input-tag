@@ -43,15 +43,8 @@
     var COMMA = 188;
     var TAB = 9;
     var ENTER = 13;
-    var ARROW_LEFT = 37;
-    var ARROW_RIGHT = 39;
 
     var DEFAULTS = {
-        /**
-         * Class names to be added on each tag entered
-         * @type {String}
-         */
-        additionalTagClasses: '',
 
         /**
          * Allow duplicate tags to be entered in the field?
@@ -94,11 +87,6 @@
          */
         focusInputOnContainerClick: true,
 
-        /**
-         * Name added to the hidden inputs within each tag
-         * @type {String}
-         */
-        hiddenInputName: 'taggles[]',
 
         /**
          * Tags that should be preloaded in the div on load
@@ -316,7 +304,6 @@
         this.sizer = document.createElement('div');
         this.pasting = false;
         this.placeholder = null;
-        this.data = null;
 
         if (this.settings.placeholder) {
             this.placeholder = document.createElement('span');
@@ -884,22 +871,7 @@
         return this.settings.preserveCase ? text : text.toLowerCase();
     };
 
-    Taggle.prototype._isIndexInRange = function(index) {
-        return index >= 0 && index <= this.tag.values.length - 1;
-    };
 
-    Taggle.prototype.getTags = function() {
-        return {
-            elements: this.getTagElements(),
-            values: this.getTagValues()
-        };
-    };
-
-    // @todo
-    // @deprecated use getTags().elements
-    Taggle.prototype.getTagElements = function() {
-        return [].slice.apply(this.tag.elements);
-    };
 
     // @todo
     // @deprecated use getTags().values
@@ -938,64 +910,7 @@
         return this;
     };
 
-    Taggle.prototype.edit = function(text, index) {
-        if (typeof text !== 'string') {
-            throw new Error('First edit argument must be of type string');
-        }
 
-        if (typeof index !== 'number') {
-            throw new Error('Second edit argument must be a number');
-        }
-
-        if (!this._isIndexInRange(index)) {
-            throw new Error('Edit index should be between 0 and ' + this.tag.values.length - 1);
-        }
-
-        var textValue = this.tag.values[index];
-
-        if (typeof textValue === 'string') {
-            this.tag.values[index] = text;
-        }
-        else {
-            this.tag.values[index].text = text;
-        }
-
-        _setText(this.tag.elements[index], text);
-
-        return this;
-    };
-
-    Taggle.prototype.move = function(currentIndex, destinationIndex) {
-        if (typeof currentIndex !== 'number' || typeof destinationIndex !== 'number') {
-            throw new Error('Both arguments must be numbers');
-        }
-
-        if (!this._isIndexInRange(currentIndex)) {
-            throw new Error('First index should be between 0 and ' + this.tag.values.length - 1);
-        }
-
-        if (!this._isIndexInRange(destinationIndex)) {
-            throw new Error('Second index should be between 0 and ' + this.tag.values.length - 1);
-        }
-
-        if (currentIndex === destinationIndex) {
-            return this;
-        }
-
-        var value = this.tag.values[currentIndex];
-        var element = this.tag.elements[currentIndex];
-        var lastElement = this.tag.elements[destinationIndex];
-
-        this.tag.values.splice(currentIndex, 1);
-        this.tag.elements.splice(currentIndex, 1);
-
-        this.tag.values.splice(destinationIndex, 0, value);
-        this.tag.elements.splice(destinationIndex, 0, element);
-
-        this.container.insertBefore(element, lastElement.nextSibling);
-
-        return this;
-    };
 
     Taggle.prototype.remove = function(text, all) {
         var len = this.tag.values.length - 1;
@@ -1032,11 +947,6 @@
         return this;
     };
 
-    Taggle.prototype.setOptions = function(options) {
-        this.settings = _extend({}, this.settings, options || {});
-
-        return this;
-    };
 
     Taggle.prototype.enable = function() {
         var buttons = [].slice.call(this.container.querySelectorAll('button'));
@@ -1060,29 +970,7 @@
         return this;
     };
 
-    Taggle.prototype.setData = function(data) {
-        this.data = data;
 
-        return this;
-    };
-
-    Taggle.prototype.getData = function() {
-        return this.data;
-    };
-
-    Taggle.prototype.attachEvents = function() {
-        var self = this;
-
-        var attached = this._attachEvents();
-
-        return this;
-    };
-
-    Taggle.prototype.removeEvents = function() {
-        this._detachEvents();
-
-        return this;
-    };
 
     return Taggle;
 }));
