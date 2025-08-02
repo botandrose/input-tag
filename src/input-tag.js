@@ -259,12 +259,9 @@ class InputTag extends HTMLElement {
           visibility: hidden;
         }
         .ui-autocomplete{
-          position: absolute !important;
-          top: 48px !important;
-          left: 6px !important;
-          right: 6px !important;
-          width: auto !important;
-          margin-top: 2px !important;
+          position: static !important;
+          width: 100% !important;
+          margin-top: 2px;
         }
         .ui-menu{
           margin: 0;
@@ -374,19 +371,12 @@ class InputTag extends HTMLElement {
       onSelect: item => this._taggle.add(item),
       minLength: 1,
       customize: (input, inputRect, container, maxHeight) => {
-        // Override the library's positioning to keep it within shadow DOM
-        // Calculate position based on actual container dimensions including borders
-        const containerRect = this.containerTarget.getBoundingClientRect();
-        const containerStyles = getComputedStyle(this.containerTarget);
-        const paddingLeft = parseInt(containerStyles.paddingLeft, 10) || 0;
-        const paddingRight = parseInt(containerStyles.paddingRight, 10) || 0;
-        const borderBottomWidth = parseInt(containerStyles.borderBottomWidth, 10) || 0;
-
-        container.style.position = 'absolute';
-        container.style.top = `${containerRect.height}px`;
-        container.style.left = `${paddingLeft}px`;
-        container.style.right = `${paddingRight}px`;
-        container.style.width = 'auto';
+        // Simple positioning within shadow DOM - no complex calculations needed
+        container.style.position = 'static';
+        container.style.top = 'auto';
+        container.style.left = 'auto';
+        container.style.right = 'auto';
+        container.style.width = '100%';
       }
     })
   }
