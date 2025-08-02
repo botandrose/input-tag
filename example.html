@@ -39,11 +39,13 @@
     <script type="importmap">
         {
             "imports": {
-                "autocompleter": "https://unpkg.com/autocompleter@9.3.2/autocomplete.es.js"
+                "autocompleter": "https://unpkg.com/autocompleter@9.3.2/autocomplete.es.js",
+                "input-tag": "./src/input-tag.js",
+                "taggle": "./src/taggle.js"
             }
         }
     </script>
-    <script type="module" src="./src/input-tag.js"></script>
+    <script type="module">import 'input-tag'</script>
     <script>
         function showValues() {
             const output = document.getElementById('output');
