@@ -1,11 +1,11 @@
-# @bard/input-tag
+# @botandrose/input-tag
 
 A declarative, framework-agnostic custom element for tag input with optional autocomplete functionality.
 
 ## Installation
 
 ```bash
-npm install @bard/input-tag
+npm install @botandrose/input-tag
 ```
 
 ## Usage
@@ -13,7 +13,7 @@ npm install @bard/input-tag
 Import the custom element:
 
 ```javascript
-import "@bard/input-tag"
+import "@botandrose/input-tag"
 ```
 
 Then use it in your HTML:

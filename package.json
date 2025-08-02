@@ -1,5 +1,5 @@
 {
-  "name": "@bard/input-tag",
+  "name": "@botandrose/input-tag",
   "version": "0.1.0",
   "type": "module",
   "description": "A declarative, zero-dependency, framework-agnostic custom element for tag input with autocomplete",
