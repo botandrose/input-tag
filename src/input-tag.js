@@ -364,7 +364,11 @@ class InputTag extends HTMLElement {
       container: this.autocompleteContainerTarget,
       className: "ui-menu ui-autocomplete",
       fetch: (text, update) => {
-        const suggestions = this.options.filter(tag => tag.toLowerCase().includes(text.toLowerCase()))
+        const currentTags = this._taggle.getTagValues()
+        const suggestions = this.options.filter(tag =>
+          tag.toLowerCase().includes(text.toLowerCase()) &&
+          !currentTags.includes(tag)
+        )
         update(suggestions)
       },
       render: item => h(`<li class="ui-menu-item">${item}</li>`),

@@ -21,9 +21,9 @@ export async function waitForElement(element, property, timeout = 1000) {
 export async function setupInputTag(html) {
   document.body.innerHTML = html
   const inputTag = document.querySelector('input-tag')
-  
+
   await waitForElement(inputTag, '_taggle')
-  
+
   return inputTag
 }
 
@@ -32,7 +32,7 @@ export async function waitForBasicInitialization(inputTag, timeout = 1000) {
   const start = Date.now()
   while ((Date.now() - start) < timeout) {
     // Wait for the component to be ready by checking if basic properties work
-    if (inputTag.tags !== undefined && typeof inputTag.add === 'function') {
+    if (inputTag.tags !== undefined && typeof inputTag.add === 'function' && inputTag._taggle) {
       return true
     }
     await new Promise(resolve => setTimeout(resolve, 10))
@@ -77,7 +77,7 @@ export function simulateInput(element, value) {
 export function simulateUserInput(inputTag, value) {
   // Focus the element first (user would click/focus)
   inputTag.focus()
-  
+
   // Find the actual input element by looking for it in the shadow DOM
   const input = findInternalInput(inputTag)
   if (input) {
@@ -91,8 +91,8 @@ function findInternalInput(inputTag) {
   // Look for input elements in the shadow DOM
   const inputs = inputTag.shadowRoot?.querySelectorAll('input')
   // Return the first input that's not hidden
-  return Array.from(inputs || []).find(input => 
-    input.type !== 'hidden' && 
+  return Array.from(inputs || []).find(input =>
+    input.type !== 'hidden' &&
     getComputedStyle(input).display !== 'none'
   )
 }
@@ -138,7 +138,7 @@ export function expectEventToFire(element, eventName) {
   return new Promise(resolve => {
     let eventFired = false
     let eventData = null
-    
+
     const handler = (e) => {
       eventFired = true
       eventData = {
@@ -151,9 +151,9 @@ export function expectEventToFire(element, eventName) {
       element.removeEventListener(eventName, handler)
       resolve({ eventFired, eventData })
     }
-    
+
     element.addEventListener(eventName, handler)
-    
+
     // Resolve after a timeout if event doesn't fire
     setTimeout(() => {
       element.removeEventListener(eventName, handler)

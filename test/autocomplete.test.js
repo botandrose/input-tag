@@ -149,6 +149,34 @@ describe('Autocomplete', () => {
       expect(filterFunction('a')).to.deep.equal(['react', 'angular', 'backbone'])
       expect(filterFunction('ck')).to.deep.equal(['backbone'])
     })
+
+    it('should exclude already-entered tags from autocomplete suggestions', async () => {
+      const inputTag = await setupAutocompleteTest()
+      const input = inputTag._taggleInputTarget
+
+      // Add some existing tags
+      inputTag.add('react')
+      inputTag.add('vue')
+      await waitForUpdate()
+
+      expect(getTagValues(inputTag)).to.deep.equal(['react', 'vue'])
+
+      // Type 'e' which should trigger autocomplete
+      simulateInput(input, 'e')
+
+      // Wait for autocomplete to populate
+      await new Promise(resolve => setTimeout(resolve, 50))
+
+      // Check the autocomplete menu items
+      const autocompleteItems = inputTag.autocompleteContainerTarget.querySelectorAll('.ui-menu-item')
+      const suggestionTexts = Array.from(autocompleteItems).map(item => item.textContent.trim())
+
+      // Should show 'svelte' and 'backbone' but NOT 'react' or 'vue'
+      expect(suggestionTexts).to.include('svelte')
+      expect(suggestionTexts).to.include('backbone')
+      expect(suggestionTexts).to.not.include('react')
+      expect(suggestionTexts).to.not.include('vue')
+    })
   })
 
   describe('Autocomplete Selection Behavior', () => {
