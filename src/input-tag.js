@@ -325,7 +325,6 @@ class InputTag extends HTMLElement {
     this._taggle = new Taggle(this, {
       inputContainer: this.containerTarget,
       preserveCase: true,
-      clearOnBlur: false,
       hiddenInputName: this.name,
       maxTags: maxTags,
       placeholder: placeholder,
@@ -618,11 +617,11 @@ class InputTag extends HTMLElement {
       // Single mode: remove excess tag-option elements from DOM
       const tagOptions = Array.from(this.children);
       // Keep only the first tag-option element, remove the rest
-      for (let i = 1; i < tagOptions.length; i++) {
-        if (tagOptions[i]) {
-          this.removeChild(tagOptions[i]);
+      tagOptions.forEach((tagOption, i) => {
+        if (i > 0 && tagOption) {
+          this.removeChild(tagOption);
         }
-      }
+      });
     }
 
     // Reinitialize taggle with new multiple setting
@@ -675,7 +674,6 @@ class InputTag extends HTMLElement {
     this._taggle = new Taggle(this, {
       inputContainer: this.containerTarget,
       preserveCase: true,
-      clearOnBlur: false,
       hiddenInputName: this.name,
       maxTags: maxTags,
       placeholder: placeholder,

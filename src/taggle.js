@@ -9,8 +9,6 @@
 // Default options //
 /////////////////////
 
-const noop = () => {};
-const retTrue = () => true;
 const BACKSPACE = 8;
 const DELETE = 46;
 const COMMA = 188;
@@ -18,12 +16,6 @@ const TAB = 9;
 const ENTER = 13;
 
 const DEFAULTS = {
-  /**
-   * Clear the input value when blurring.
-   * @type {Boolean}
-   */
-  clearOnBlur: true,
-
   /**
    * Class added to the container div when focused
    * @type {String}
@@ -62,32 +54,18 @@ const DEFAULTS = {
   preserveCase: false,
 
   /**
-   * Function hook called before a tag is added. Return false
-   * to prevent tag from being added
-   * @param  {String} tag The tag to be added
-   */
-  onBeforeTagAdd: noop,
-
-  /**
    * Function hook called when a tag is added
    * @param  {Event} event Event triggered when tag was added
    * @param  {String} tag The tag added
    */
-  onTagAdd: noop,
-
-  /**
-   * Function hook called before a tag is removed. Return false
-   * to prevent tag from being removed
-   * @param  {String} tag The tag to be removed
-   */
-  onBeforeTagRemove: retTrue,
+  onTagAdd: () => {},
 
   /**
    * Function hook called when a tag is removed
    * @param  {Event} event Event triggered when tag was removed
    * @param  {String} tag The tag removed
    */
-  onTagRemove: noop
+  onTagRemove: () => {}
 };
 
 //////////////////////
@@ -130,10 +108,6 @@ class Taggle {
       this.placeholder = document.createElement('span');
     }
 
-    if (typeof el === 'string') {
-      this.container = document.getElementById(el);
-    }
-
     this._backspacePressed = false;
     this._inputPosition = 0;
     this._setMeasurements();
@@ -149,10 +123,10 @@ class Taggle {
     const style = window.getComputedStyle(this.container);
     this.measurements.container.style = style;
 
-    const lpad = parseInt(style['padding-left'] || style.paddingLeft, 10);
-    const rpad = parseInt(style['padding-right'] || style.paddingRight, 10);
-    const lborder = parseInt(style['border-left-width'] || style.borderLeftWidth, 10);
-    const rborder = parseInt(style['border-right-width'] || style.borderRightWidth, 10);
+    const lpad = parseInt(style.paddingLeft, 10);
+    const rpad = parseInt(style.paddingRight, 10);
+    const lborder = parseInt(style.borderLeftWidth, 10);
+    const rborder = parseInt(style.borderRightWidth, 10);
 
     this.measurements.container.padding = lpad + rpad + lborder + rborder;
   }
@@ -248,10 +222,6 @@ class Taggle {
     }
     const limit = this.settings.maxTags;
     if (limit !== null && limit <= this.getTagValues().length) {
-      return false;
-    }
-
-    if (this.settings.onBeforeTagAdd(e, text) === false) {
       return false;
     }
 
@@ -380,11 +350,6 @@ class Taggle {
       this.container.classList.remove(this.settings.containerFocusClass);
     }
 
-    if (this.settings.clearOnBlur) {
-      this.input.value = '';
-      this._setInputWidth();
-    }
-
     if (!this.tag.values.length && !this.input.value) {
       this._showPlaceholder();
     }
@@ -454,10 +419,6 @@ class Taggle {
     tagOption.textContent = text;
     tagOption.setAttribute('value', text);
 
-    if (!(tagOption instanceof HTMLElement) || !(tagOption.localName === 'tag-option' || tagOption.tagName === 'TAG-OPTION')) {
-      throw new Error('tagFormatter must return an tag-option element');
-    }
-
     this.tag.values.splice(index, 0, text);
     this.tag.elements.splice(index, 0, tagOption);
     this._inputPosition = _clamp(this._inputPosition + 1, 0, this.tag.values.length);
@@ -485,33 +446,21 @@ class Taggle {
    * @param {Event} e
    */
   _remove(tagOption, e) {
-    if (tagOption.tagName.toLowerCase() !== 'tag-option') {
-      tagOption = tagOption.parentNode;
-    }
-
     const index = this.tag.elements.indexOf(tagOption);
+    if (index === -1) return;
+
     const text = this.tag.values[index];
 
-    const done = (error) => {
-      if (error) return;
+    tagOption.remove();
+    this.tag.elements.splice(index, 1);
+    this.tag.values.splice(index, 1);
+    this.settings.onTagRemove(e, text);
 
-      tagOption.remove();
-
-      this.tag.elements.splice(index, 1);
-      this.tag.values.splice(index, 1);
-
-      this.settings.onTagRemove(e, text);
-
-      if (index < this._inputPosition) {
-        this._inputPosition = _clamp(this._inputPosition - 1, 0, this.tag.values.length);
-      }
-
-      this._setFocusStateForContainer();
-    };
-
-    if (this.settings.onBeforeTagRemove(e, text, done)) {
-      done();
+    if (index < this._inputPosition) {
+      this._inputPosition = _clamp(this._inputPosition - 1, 0, this.tag.values.length);
     }
+
+    this._setFocusStateForContainer();
   }
 
   /**
@@ -533,25 +482,15 @@ class Taggle {
     return this.input;
   }
 
-  getContainer() {
-    return this.container;
-  }
-
   add(text, index) {
     const isArr = Array.isArray(text);
 
     if (isArr) {
-      let startingIndex = index;
-
-      for (let i = 0, len = text.length; i < len; i++) {
-        if (typeof text[i] === 'string') {
-          this._add(null, text[i], startingIndex);
-
-          if (!isNaN(startingIndex)) {
-            startingIndex += 1;
-          }
+      text.forEach((tag, i) => {
+        if (typeof tag === 'string') {
+          this._add(null, tag, index ? index + i : index);
         }
-      }
+      });
     }
     else {
       this._add(null, text, index);
@@ -560,35 +499,17 @@ class Taggle {
     return this;
   }
 
-  remove(text, all) {
-    let len = this.tag.values.length - 1;
-    let found = false;
-
-    while (len > -1) {
-      const tagText = this.tag.values[len];
-
-      if (tagText === text) {
-        found = true;
-        this._remove(this.tag.elements[len]);
-      }
-
-      if (found && !all) {
-        break;
-      }
-
-      len--;
+  remove(text) {
+    const index = this.tag.values.indexOf(text);
+    if (index > -1) {
+      this._remove(this.tag.elements[index]);
     }
-
     return this;
   }
 
   removeAll() {
-    for (let i = this.tag.values.length - 1; i >= 0; i--) {
-      this._remove(this.tag.elements[i]);
-    }
-
+    [...this.tag.elements].forEach(element => this._remove(element));
     this._showPlaceholder();
-
     return this;
   }
 
@@ -615,6 +536,10 @@ class Taggle {
 
   disable() {
     return this._setDisabledState(true);
+  }
+
+  destroy() {
+    this._detachEvents();
   }
 }
 
