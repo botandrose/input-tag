@@ -110,7 +110,7 @@ class InputTag extends HTMLElement {
     this._taggle.tag.elements = [...this.children]
     this._taggle.tag.values = values
     this._inputPosition = this._taggle.tag.values.length;
-    
+
     // Update the taggle display elements to match the current values
     const taggleElements = this._taggle.tag.elements;
     taggleElements.forEach((element, index) => {
@@ -118,7 +118,7 @@ class InputTag extends HTMLElement {
         element.setAttribute('data-value', values[index]);
       }
     });
-    
+
     // Update internal value to match
     this.updateValue();
   }
@@ -259,10 +259,12 @@ class InputTag extends HTMLElement {
           visibility: hidden;
         }
         .ui-autocomplete{
-          position: absolute;
-          top: 0;
-          left: 0;
+          position: absolute !important;
+          top: 48px !important;
+          left: 6px !important;
+          right: 6px !important;
           width: auto !important;
+          margin-top: 2px !important;
         }
         .ui-menu{
           margin: 0;
@@ -297,7 +299,7 @@ class InputTag extends HTMLElement {
           color: inherit;
         }
       </style>
-      <div>
+      <div style="position: relative;">
         <div id="container">
           <slot></slot>
         </div>
@@ -349,7 +351,9 @@ class InputTag extends HTMLElement {
     this._taggleInputTarget.insertAdjacentElement("afterend", this.buttonTarget)
 
     this.autocompleteContainerTarget = h(`<ul>`);
-    this.buttonTarget.insertAdjacentElement("afterend", this.autocompleteContainerTarget)
+    // Insert autocomplete container into the positioned wrapper div
+    const wrapperDiv = this.shadowRoot.querySelector('div[style*="position: relative"]');
+    wrapperDiv.appendChild(this.autocompleteContainerTarget)
 
     this.setupAutocomplete()
 
@@ -369,6 +373,21 @@ class InputTag extends HTMLElement {
       render: item => h(`<li class="ui-menu-item">${item}</li>`),
       onSelect: item => this._taggle.add(item),
       minLength: 1,
+      customize: (input, inputRect, container, maxHeight) => {
+        // Override the library's positioning to keep it within shadow DOM
+        // Calculate position based on actual container dimensions including borders
+        const containerRect = this.containerTarget.getBoundingClientRect();
+        const containerStyles = getComputedStyle(this.containerTarget);
+        const paddingLeft = parseInt(containerStyles.paddingLeft, 10) || 0;
+        const paddingRight = parseInt(containerStyles.paddingRight, 10) || 0;
+        const borderBottomWidth = parseInt(containerStyles.borderBottomWidth, 10) || 0;
+
+        container.style.position = 'absolute';
+        container.style.top = `${containerRect.height}px`;
+        container.style.left = `${paddingLeft}px`;
+        container.style.right = `${paddingRight}px`;
+        container.style.width = 'auto';
+      }
     })
   }
 
@@ -379,7 +398,7 @@ class InputTag extends HTMLElement {
 
   attributeChangedCallback(name, oldValue, newValue) {
     if (oldValue === newValue) return;
-    
+
     // Only handle changes after the component is connected and initialized
     if (!this._taggle) return;
 
@@ -553,7 +572,7 @@ class InputTag extends HTMLElement {
     if (hiddenInput) {
       hiddenInput.name = newName || '';
     }
-    
+
     // Update the form value with the new name
     if (this._internals.value) {
       this.value = this._internals.value; // This will recreate FormData with new name
@@ -562,13 +581,13 @@ class InputTag extends HTMLElement {
 
   handleMultipleChange(isMultiple) {
     if (!this._taggle) return;
-    
+
     // Update the internal multiple state
     this.multiple = isMultiple;
-    
+
     // Get current tags
     const currentTags = this._taggle.getTagValues();
-    
+
     if (!isMultiple && currentTags.length > 1) {
       // Single mode: remove excess tag-option elements from DOM
       const tagOptions = Array.from(this.children);
@@ -579,10 +598,10 @@ class InputTag extends HTMLElement {
         }
       }
     }
-    
+
     // Reinitialize taggle with new multiple setting
     this.reinitializeTaggle();
-    
+
     // Restore tags, respecting the new multiple constraint
     if (isMultiple) {
       // Multiple mode: restore all remaining tags
@@ -595,23 +614,23 @@ class InputTag extends HTMLElement {
         this._taggle.add(currentTags[0]);
       }
     }
-    
+
     this.updateValue();
   }
 
   handleRequiredChange(isRequired) {
     if (!this._taggle) return;
-    
+
     // Update the internal required state
     this.required = isRequired;
-    
+
     // Update validation
     this.checkRequired();
   }
 
   handleListChange(newListId) {
     if (!this._taggle) return;
-    
+
     // The options getter will automatically read from the new datalist
     // No additional action needed as autocomplete will pick up the change
   }
@@ -654,7 +673,7 @@ class InputTag extends HTMLElement {
 
   updateValue() {
     if (!this._taggle) return;
-    
+
     // Update the internal value to match taggle state
     const values = this._taggle.getTagValues();
     const oldValues = this._internals.value;
