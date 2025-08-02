@@ -375,12 +375,11 @@ class InputTag extends HTMLElement {
       onSelect: item => this._taggle.add(item),
       minLength: 1,
       customize: (input, inputRect, container, maxHeight) => {
-        // Simple positioning within shadow DOM - no complex calculations needed
-        container.style.position = 'static';
-        container.style.top = 'auto';
-        container.style.left = 'auto';
-        container.style.right = 'auto';
-        container.style.width = '100%';
+        // Position autocomplete below the input-tag container, accounting for dynamic height
+        this._updateAutocompletePosition(container);
+
+        // Store reference to update positioning when container height changes
+        this._autocompleteContainer = container;
       }
     })
   }
@@ -464,6 +463,12 @@ class InputTag extends HTMLElement {
     }
     this.syncValue()
     this.checkRequired()
+
+    // Update autocomplete position if it's currently open
+    if (this._autocompleteContainer) {
+      // Use setTimeout to allow DOM to update first
+      setTimeout(() => this._updateAutocompletePosition(this._autocompleteContainer), 0)
+    }
   }
 
   onTagRemove(event, tag) {
@@ -476,6 +481,12 @@ class InputTag extends HTMLElement {
     }
     this.syncValue()
     this.checkRequired()
+
+    // Update autocomplete position if it's currently open
+    if (this._autocompleteContainer) {
+      // Use setTimeout to allow DOM to update first
+      setTimeout(() => this._updateAutocompletePosition(this._autocompleteContainer), 0)
+    }
   }
 
   syncValue() {
@@ -528,6 +539,20 @@ class InputTag extends HTMLElement {
     if (!this.autocompleteContainerTarget) return []
     const items = this.autocompleteContainerTarget.querySelectorAll('.ui-menu-item')
     return Array.from(items).map(item => item.textContent.trim())
+  }
+
+  // Update autocomplete position based on current container height
+  _updateAutocompletePosition(container) {
+    if (!container) return
+
+    const inputTagRect = this.containerTarget.getBoundingClientRect();
+
+    container.style.setProperty('position', 'absolute', 'important');
+    container.style.setProperty('top', `${inputTagRect.height}px`, 'important');
+    container.style.setProperty('left', '0', 'important');
+    container.style.setProperty('right', '0', 'important');
+    container.style.setProperty('width', '100%', 'important');
+    container.style.setProperty('z-index', '1000', 'important');
   }
 
   addAt(tag, index) {

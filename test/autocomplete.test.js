@@ -328,6 +328,83 @@ describe('Autocomplete', () => {
       expect(inputTag.autocompleteContainerTarget.tagName.toLowerCase()).to.equal('ul')
     })
 
+    it('should position autocomplete correctly when input-tag wraps to multiple lines', async () => {
+      document.body.innerHTML = `
+        <div style="width: 200px;">
+          <input-tag name="frameworks" list="suggestions" multiple></input-tag>
+          <datalist id="suggestions">
+            <option value="react">React</option>
+            <option value="vue">Vue</option>
+            <option value="angular">Angular</option>
+          </datalist>
+        </div>
+      `
+      const inputTag = document.querySelector('input-tag')
+      await waitForBasicInitialization(inputTag)
+      const input = inputTag._taggleInputTarget
+
+      // Add enough tags to force wrapping
+      inputTag.add('very-long-tag-name-that-will-wrap')
+      inputTag.add('another-very-long-tag-name')
+      inputTag.add('yet-another-long-tag')
+      await waitForUpdate()
+
+      // Get the container height after tags are added
+      const containerHeight = inputTag.containerTarget.getBoundingClientRect().height
+
+      // Trigger autocomplete
+      await simulateInput(input, 'r')
+
+      // Check that autocomplete container is positioned correctly
+      const autocompleteContainer = inputTag.autocompleteContainerTarget
+      const computedStyle = window.getComputedStyle(autocompleteContainer)
+
+      expect(computedStyle.position).to.equal('absolute')
+      expect(computedStyle.top).to.equal(`${containerHeight}px`)
+      expect(computedStyle.zIndex).to.equal('1000')
+    })
+
+    it('should dynamically reposition autocomplete when tags are added while open', async () => {
+      document.body.innerHTML = `
+        <div style="width: 200px;">
+          <input-tag name="frameworks" list="suggestions" multiple></input-tag>
+          <datalist id="suggestions">
+            <option value="react">React</option>
+            <option value="vue">Vue</option>
+            <option value="angular">Angular</option>
+          </datalist>
+        </div>
+      `
+      const inputTag = document.querySelector('input-tag')
+      await waitForBasicInitialization(inputTag)
+      const input = inputTag._taggleInputTarget
+
+      // Get initial container height
+      const initialHeight = inputTag.containerTarget.getBoundingClientRect().height
+
+      // Open autocomplete
+      await simulateInput(input, 'r')
+
+      // Get initial autocomplete position
+      const autocompleteContainer = inputTag.autocompleteContainerTarget
+      let computedStyle = window.getComputedStyle(autocompleteContainer)
+      expect(computedStyle.top).to.equal(`${initialHeight}px`)
+
+      // Add a tag while autocomplete is open
+      inputTag.add('very-long-tag-name-that-will-cause-wrapping')
+      await waitForUpdate()
+
+      // Wait for position update
+      await new Promise(resolve => setTimeout(resolve, 10))
+
+      // Get new container height and verify autocomplete repositioned
+      const newHeight = inputTag.containerTarget.getBoundingClientRect().height
+      computedStyle = window.getComputedStyle(autocompleteContainer)
+
+      expect(newHeight).to.be.greaterThan(initialHeight)
+      expect(computedStyle.top).to.equal(`${newHeight}px`)
+    })
+
     xit('should position autocomplete container after button', async () => {
       const inputTag = await setupInputTag('<input-tag name="tags" multiple></input-tag>')
 
