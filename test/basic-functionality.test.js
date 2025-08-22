@@ -97,6 +97,88 @@ describe('Basic Tag Functionality', () => {
     })
   })
 
+  describe('Empty Form Serialization', () => {
+    it('should serialize empty multiple input-tag as empty array', async () => {
+      const form = document.createElement('form')
+      form.innerHTML = `<input-tag name="tags" multiple></input-tag>`
+      document.body.appendChild(form)
+
+      const inputTag = form.querySelector('input-tag')
+      await waitForUpdate()
+
+      // Wait for component initialization
+      while (!inputTag._taggle) {
+        await waitForUpdate()
+      }
+
+      const formData = new FormData(form)
+      const values = formData.getAll('tags')
+      expect(values).to.deep.equal([])
+
+      document.body.removeChild(form)
+    })
+
+    it('should serialize empty single input-tag as empty string (like standard HTML inputs)', async () => {
+      const form = document.createElement('form')
+      form.innerHTML = `<input-tag name="status"></input-tag>`
+      document.body.appendChild(form)
+
+      const inputTag = form.querySelector('input-tag')
+      await waitForUpdate()
+
+      // Wait for component initialization
+      while (!inputTag._taggle) {
+        await waitForUpdate()
+      }
+
+      const formData = new FormData(form)
+      const value = formData.get('status')
+      expect(value).to.equal('')
+
+      document.body.removeChild(form)
+    })
+
+    it('should not include empty string in form data for empty multiple input-tag', async () => {
+      const form = document.createElement('form')
+      form.innerHTML = `<input-tag name="tags" multiple></input-tag>`
+      document.body.appendChild(form)
+
+      const inputTag = form.querySelector('input-tag')
+      await waitForUpdate()
+
+      // Wait for component initialization
+      while (!inputTag._taggle) {
+        await waitForUpdate()
+      }
+
+      const formData = new FormData(form)
+      const values = formData.getAll('tags')
+      expect(values).to.not.include('')
+
+      document.body.removeChild(form)
+    })
+
+    it('should include empty string in form data for empty single input-tag (like standard HTML inputs)', async () => {
+      const form = document.createElement('form')
+      form.innerHTML = `<input-tag name="status"></input-tag>`
+      document.body.appendChild(form)
+
+      const inputTag = form.querySelector('input-tag')
+      await waitForUpdate()
+
+      // Wait for component initialization
+      while (!inputTag._taggle) {
+        await waitForUpdate()
+      }
+
+      const formData = new FormData(form)
+      const values = formData.getAll('status')
+      expect(values).to.deep.equal([''])
+
+      document.body.removeChild(form)
+    })
+  })
+
   describe('Tag Creation', () => {
     it('should create empty input-tag', async () => {
       const inputTag = await setupInputTag('<input-tag name="tags" multiple></input-tag>')

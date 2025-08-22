@@ -160,7 +160,11 @@ class InputTag extends HTMLElement {
 
     const formData = new FormData();
     values.forEach(value => formData.append(this.name, value));
-    if(values.length === 0) formData.append(this.name, ""); // none value
+    // For single mode, append empty string when no values (like standard HTML inputs)
+    // For multiple mode, leave empty (like standard HTML multiple selects)
+    if (values.length === 0 && !this.hasAttribute('multiple')) {
+      formData.append(this.name, "");
+    }
     this._internals.setFormValue(formData);
 
     // Update taggle to match the new values
@@ -563,7 +567,11 @@ class InputTag extends HTMLElement {
 
     const formData = new FormData();
     values.forEach(value => formData.append(this.name, value));
-    if(values.length === 0) formData.append(this.name, ""); // none value
+    // For single mode, append empty string when no values (like standard HTML inputs)
+    // For multiple mode, leave empty (like standard HTML multiple selects)
+    if (values.length === 0 && !this.hasAttribute('multiple')) {
+      formData.append(this.name, "");
+    }
     this._internals.setFormValue(formData);
 
     if(this.initialized && !this.suppressEvents && JSON.stringify(oldValues) !== JSON.stringify(values)) {
@@ -795,7 +803,11 @@ class InputTag extends HTMLElement {
 
     const formData = new FormData();
     values.forEach(value => formData.append(this.name, value));
-    if(values.length === 0) formData.append(this.name, ""); // none value
+    // For single mode, append empty string when no values (like standard HTML inputs)
+    // For multiple mode, leave empty (like standard HTML multiple selects)
+    if (values.length === 0 && !this.hasAttribute('multiple')) {
+      formData.append(this.name, "");
+    }
     this._internals.setFormValue(formData);
 
     // Check validity after updating

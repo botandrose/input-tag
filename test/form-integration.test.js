@@ -93,7 +93,7 @@ describe('Form Integration', () => {
       const formData = new FormData(form)
       const values = formData.getAll('empty-tags')
 
-      expect(values).to.deep.equal(['']) // Should include empty string for none value
+      expect(values).to.deep.equal([]) // Should be empty array for empty multiple input-tag
     })
 
     it('should update FormData when tags change', async () => {
