@@ -78,19 +78,14 @@ class InputTag extends HTMLElement {
     this.observer = new MutationObserver(mutations => {
       let needsTagOptionsUpdate = false;
       let needsAutocompleteUpdate = false;
-      
+
       for (const mutation of mutations) {
         if (mutation.type === 'childList') {
-          // Check if tag-option or datalist elements were added/removed
-          const hasTagOptionChanges = [...mutation.addedNodes, ...mutation.removedNodes]
-            .some(node => node.tagName === 'TAG-OPTION');
-          const hasDatalistChanges = [...mutation.addedNodes, ...mutation.removedNodes]
-            .some(node => node.tagName === 'DATALIST');
-            
-          if (hasTagOptionChanges) {
+          const addedRemovedNodes = [...mutation.addedNodes, ...mutation.removedNodes]
+          if (addedRemovedNodes.some(node => node.tagName === 'TAG-OPTION')) {
             needsTagOptionsUpdate = true;
           }
-          if (hasDatalistChanges) {
+          if (addedRemovedNodes.some(node => node.tagName === 'DATALIST')) {
             needsAutocompleteUpdate = true;
           }
         } else if (mutation.type === 'attributes') {
@@ -100,7 +95,7 @@ class InputTag extends HTMLElement {
           }
         }
       }
-      
+
       if (needsTagOptionsUpdate || needsAutocompleteUpdate) {
         this.unobserve();
         if (needsTagOptionsUpdate) {
@@ -129,7 +124,6 @@ class InputTag extends HTMLElement {
 
   processTagOptions() {
     if(!this._taggle || !this._taggle.tag) return
-    // Filter out datalist elements - only process tag-option elements
     const tagOptions = Array.from(this.children).filter(e => e.tagName === 'TAG-OPTION')
     const values = tagOptions.map(e => e.value).filter(value => value !== null && value !== undefined)
     this._taggle.tag.elements = tagOptions
@@ -200,13 +194,13 @@ class InputTag extends HTMLElement {
         return [...datalist.options].map(option => option.value).filter(value => value !== null && value !== undefined)
       }
     }
-    
+
     // Fall back to nested datalist
     const nestedDatalist = this.querySelector('datalist')
     if(nestedDatalist) {
       return [...nestedDatalist.options].map(option => option.hasAttribute('value') ? option.value : option.textContent).filter(value => value !== null && value !== undefined)
     }
-    
+
     return []
   }
 
@@ -221,7 +215,7 @@ class InputTag extends HTMLElement {
         })).filter(item => item.value !== null && item.value !== undefined)
       }
     }
-    
+
     // Fall back to nested datalist
     const nestedDatalist = this.querySelector('datalist')
     if(nestedDatalist) {
@@ -230,7 +224,7 @@ class InputTag extends HTMLElement {
         label: option.textContent || option.value
       })).filter(item => item.value !== null && item.value !== undefined)
     }
-    
+
     return []
   }
 
@@ -411,11 +405,14 @@ class InputTag extends HTMLElement {
 
     this.observe() // Start observing after taggle is set up
     this.initialized = true
+
+    // Update visibility based on current state
+    this.updateInputVisibility()
   }
 
   setupAutocomplete() {
     const optionsWithLabels = this._getOptionsWithLabels()
-    
+
     autocomplete({
       input: this._taggleInputTarget,
       container: this.autocompleteContainerTarget,
@@ -436,7 +433,7 @@ class InputTag extends HTMLElement {
         tagOption.setAttribute('value', item.value)
         tagOption.textContent = item.label
         this.appendChild(tagOption)
-        
+
         // Clear input
         this._taggleInputTarget.value = ''
       },
@@ -530,6 +527,7 @@ class InputTag extends HTMLElement {
     }
     this.syncValue()
     this.checkRequired()
+    this.updateInputVisibility()
 
     // Update autocomplete position if it's currently open
     if (this._autocompleteContainer) {
@@ -548,6 +546,7 @@ class InputTag extends HTMLElement {
     }
     this.syncValue()
     this.checkRequired()
+    this.updateInputVisibility()
 
     // Update autocomplete position if it's currently open
     if (this._autocompleteContainer) {
@@ -620,6 +619,28 @@ class InputTag extends HTMLElement {
     container.style.setProperty('right', '0', 'important');
     container.style.setProperty('width', '100%', 'important');
     container.style.setProperty('z-index', '1000', 'important');
+  }
+
+  updateInputVisibility() {
+    if (!this._taggleInputTarget || !this.buttonTarget) return;
+
+    const isMultiple = this.hasAttribute('multiple');
+    const hasTags = this._taggle && this._taggle.getTagValues().length > 0;
+
+    if (isMultiple) {
+      // Multiple mode: always show input and button
+      this._taggleInputTarget.style.display = '';
+      this.buttonTarget.style.display = '';
+    } else {
+      // Single mode: hide input and button when tag exists
+      if (hasTags) {
+        this._taggleInputTarget.style.display = 'none';
+        this.buttonTarget.style.display = 'none';
+      } else {
+        this._taggleInputTarget.style.display = '';
+        this.buttonTarget.style.display = '';
+      }
+    }
   }
 
   addAt(tag, index) {
@@ -709,6 +730,7 @@ class InputTag extends HTMLElement {
     }
 
     this.updateValue();
+    this.updateInputVisibility();
   }
 
   handleRequiredChange(isRequired) {

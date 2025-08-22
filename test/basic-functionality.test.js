@@ -19,6 +19,84 @@ import {
 describe('Basic Tag Functionality', () => {
   setupGlobalTestHooks()
 
+  describe('Single Mode Input Visibility', () => {
+    it('should hide input and button when tag exists in single mode', async () => {
+      const inputTag = await setupInputTag(`
+        <input-tag name="status">
+          <tag-option value="active">Active</tag-option>
+        </input-tag>
+      `)
+
+      // Input and button should be hidden when tag exists
+      const input = inputTag._taggleInputTarget
+      const button = inputTag.buttonTarget
+
+      expect(input.style.display).to.equal('none')
+      expect(button.style.display).to.equal('none')
+    })
+
+    it('should show input and button when no tag exists in single mode', async () => {
+      const inputTag = await setupInputTag('<input-tag name="status"></input-tag>')
+
+      // Input and button should be visible when no tag exists
+      const input = inputTag._taggleInputTarget
+      const button = inputTag.buttonTarget
+
+      expect(input.style.display).to.not.equal('none')
+      expect(button.style.display).to.not.equal('none')
+    })
+
+    it('should show input and button after removing tag in single mode', async () => {
+      const inputTag = await setupInputTag(`
+        <input-tag name="status">
+          <tag-option value="active">Active</tag-option>
+        </input-tag>
+      `)
+
+      // Remove the tag
+      const tagElement = getTagElements(inputTag)[0]
+      clickTagRemoveButton(tagElement)
+      await waitForUpdate()
+
+      // Input and button should be visible again
+      const input = inputTag._taggleInputTarget
+      const button = inputTag.buttonTarget
+
+      expect(input.style.display).to.not.equal('none')
+      expect(button.style.display).to.not.equal('none')
+    })
+
+    it('should hide input and button after adding tag in single mode', async () => {
+      const inputTag = await setupInputTag('<input-tag name="status"></input-tag>')
+
+      // Add a tag
+      await simulateUserAddTag(inputTag, 'active')
+
+      // Input and button should be hidden now
+      const input = inputTag._taggleInputTarget
+      const button = inputTag.buttonTarget
+
+      expect(input.style.display).to.equal('none')
+      expect(button.style.display).to.equal('none')
+    })
+
+    it('should always show input and button in multiple mode', async () => {
+      const inputTag = await setupInputTag(`
+        <input-tag name="tags" multiple>
+          <tag-option value="tag1">Tag 1</tag-option>
+          <tag-option value="tag2">Tag 2</tag-option>
+        </input-tag>
+      `)
+
+      // Input and button should always be visible in multiple mode
+      const input = inputTag._taggleInputTarget
+      const button = inputTag.buttonTarget
+
+      expect(input.style.display).to.not.equal('none')
+      expect(button.style.display).to.not.equal('none')
+    })
+  })
+
   describe('Tag Creation', () => {
     it('should create empty input-tag', async () => {
       const inputTag = await setupInputTag('<input-tag name="tags" multiple></input-tag>')
