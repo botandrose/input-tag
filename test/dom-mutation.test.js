@@ -28,7 +28,7 @@ describe('DOM Mutation Handling', () => {
       await waitForUpdate()
 
       expect(inputTag.name).to.equal('morphed-name')
-      
+
       // Check that internal hidden input also updated
       const hiddenInput = inputTag.shadowRoot.querySelector('input[type="hidden"]')
       expect(hiddenInput.name).to.equal('morphed-name')
@@ -76,7 +76,7 @@ describe('DOM Mutation Handling', () => {
 
       // Should now be limited to single tag mode
       expect(getTagElements(inputTag)).to.have.length(1)
-      
+
       // Trying to add another should not work
       inputTag.add('third')
       await waitForUpdate()
@@ -199,7 +199,7 @@ describe('DOM Mutation Handling', () => {
       await waitForUpdate()
 
       expect(getTagValues(inputTag)).to.deep.equal(['modified'])
-      
+
       // Verify the tag visually updated too
       const tagElements = getTagElements(inputTag)
       expect(tagElements[0].getAttribute('data-value')).to.equal('modified')
@@ -247,7 +247,7 @@ describe('DOM Mutation Handling', () => {
       expect(inputTag.name).to.equal('morphed')
       expect(inputTag.hasAttribute('required')).to.be.true
       expect(inputTag.options).to.deep.equal(['option1'])
-      
+
       // Should still be invalid due to having no valid tags for required field
       expect(inputTag.checkValidity()).to.be.true // has existing tag
     })
@@ -363,7 +363,7 @@ describe('DOM Mutation Handling', () => {
 
       // Disconnect should clean up observer
       inputTag.disconnectedCallback()
-      
+
       // Observer should be cleaned up (can't directly test this, but ensure no errors)
       expect(() => {
         inputTag.setAttribute('name', 'should-not-crash')
@@ -403,7 +403,7 @@ describe('DOM Mutation Handling', () => {
         option.textContent = `Rapid ${i}`
         inputTag.appendChild(option)
       }
-      
+
       await waitForUpdate(100) // Give extra time for processing
 
       expect(getTagElements(inputTag)).to.have.length(10)

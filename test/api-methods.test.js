@@ -494,7 +494,7 @@ describe('API Methods', () => {
 
       expect(typeof inputTag.disable).to.equal('function')
       expect(typeof inputTag.enable).to.equal('function')
-      
+
       // These should not throw
       expect(() => {
         inputTag.disable()
@@ -511,7 +511,7 @@ describe('API Methods', () => {
       `)
 
       expect(typeof inputTag.addAt).to.equal('function')
-      
+
       inputTag.addAt('second', 1)
       await waitForUpdate()
 

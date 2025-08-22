@@ -95,7 +95,7 @@ describe('Basic Tag Functionality', () => {
 
       // Type in the input
       simulateUserInput(inputTag, 'sass')
-      
+
       // Click the + button (find it via shadow DOM)
       const button = inputTag.shadowRoot.querySelector('button.add')
       simulateClick(button)
@@ -201,7 +201,7 @@ describe('Basic Tag Functionality', () => {
 
       // Focus and simulate delete key behavior
       const input = simulateUserInput(inputTag, '') // Focus and get internal input
-      
+
       // Delete key should remove next tag
       if (input) {
         simulateKeydown(input, KEYCODES.DELETE)

@@ -116,17 +116,17 @@ describe('Autocomplete', () => {
       const inputTag = await setupAutocompleteTest()
       const input = inputTag._taggleInputTarget
 
-      // Test 're' shows only 'react'
+      // Test 're' shows only 'React' (label)
       await simulateInput(input, 're')
-      expect(inputTag._autocompleteSuggestions).to.deep.equal(['react'])
+      expect(inputTag._autocompleteSuggestions).to.deep.equal(['React'])
 
-      // Test 'e' shows multiple matches
+      // Test 'e' shows multiple matches (labels)
       await simulateInput(input, 'e')
-      expect(inputTag._autocompleteSuggestions).to.include.members(['react', 'vue', 'svelte', 'backbone'])
+      expect(inputTag._autocompleteSuggestions).to.include.members(['React', 'Vue', 'Svelte', 'Backbone'])
 
-      // Test 'ang' shows only 'angular'
+      // Test 'ang' shows only 'Angular' (label)
       await simulateInput(input, 'ang')
-      expect(inputTag._autocompleteSuggestions).to.deep.equal(['angular'])
+      expect(inputTag._autocompleteSuggestions).to.deep.equal(['Angular'])
 
       // Test 'xyz' shows no matches
       await simulateInput(input, 'xyz')
@@ -137,26 +137,26 @@ describe('Autocomplete', () => {
       const inputTag = await setupAutocompleteTest()
       const input = inputTag._taggleInputTarget
 
-      // Test uppercase 'REACT' shows 'react'
+      // Test uppercase 'REACT' shows 'React' (label)
       await simulateInput(input, 'REACT')
-      expect(inputTag._autocompleteSuggestions).to.deep.equal(['react'])
+      expect(inputTag._autocompleteSuggestions).to.deep.equal(['React'])
 
-      // Test mixed case 'VuE' shows 'vue'
+      // Test mixed case 'VuE' shows 'Vue' (label)
       await simulateInput(input, 'VuE')
-      expect(inputTag._autocompleteSuggestions).to.deep.equal(['vue'])
+      expect(inputTag._autocompleteSuggestions).to.deep.equal(['Vue'])
     })
 
     it('should filter with partial matches', async () => {
       const inputTag = await setupAutocompleteTest()
       const input = inputTag._taggleInputTarget
 
-      // Test 'a' shows tags containing 'a'
+      // Test 'a' shows tags containing 'a' (labels)
       await simulateInput(input, 'a')
-      expect(inputTag._autocompleteSuggestions).to.include.members(['react', 'angular', 'backbone'])
+      expect(inputTag._autocompleteSuggestions).to.include.members(['React', 'Angular', 'Backbone'])
 
-      // Test 'ck' shows only 'backbone'
+      // Test 'ck' shows only 'Backbone' (label)
       await simulateInput(input, 'ck')
-      expect(inputTag._autocompleteSuggestions).to.deep.equal(['backbone'])
+      expect(inputTag._autocompleteSuggestions).to.deep.equal(['Backbone'])
     })
 
     it('should exclude already-entered tags from autocomplete suggestions', async () => {
@@ -173,11 +173,11 @@ describe('Autocomplete', () => {
       // Type 'e' which should trigger autocomplete
       await simulateInput(input, 'e')
 
-      // Should show 'svelte' and 'backbone' but NOT 'react' or 'vue'
-      expect(inputTag._autocompleteSuggestions).to.include('svelte')
-      expect(inputTag._autocompleteSuggestions).to.include('backbone')
-      expect(inputTag._autocompleteSuggestions).to.not.include('react')
-      expect(inputTag._autocompleteSuggestions).to.not.include('vue')
+      // Should show 'Svelte' and 'Backbone' (labels) but NOT 'React' or 'Vue'
+      expect(inputTag._autocompleteSuggestions).to.include('Svelte')
+      expect(inputTag._autocompleteSuggestions).to.include('Backbone')
+      expect(inputTag._autocompleteSuggestions).to.not.include('React')
+      expect(inputTag._autocompleteSuggestions).to.not.include('Vue')
     })
   })
 

@@ -143,7 +143,7 @@ class Taggle {
     this.input.tabIndex = 1;
     this.sizer.className = 'taggle_sizer';
 
-    [...this.container.children].forEach(tagOption => {
+    [...this.container.children].filter(child => child.tagName === 'TAG-OPTION').forEach(tagOption => {
       this.tag.values.push(tagOption.value);
       this.tag.elements.push(tagOption);
       this._inputPosition = _clamp(this._inputPosition + 1, 0, this.tag.values.length);

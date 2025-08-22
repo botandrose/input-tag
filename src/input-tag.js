@@ -53,6 +53,10 @@ class TagOption extends HTMLElement {
   get value() {
     return this.getAttribute("value") || this.innerText
   }
+
+  get label() {
+    return this.innerText
+  }
 }
 customElements.define("tag-option", TagOption);
 
@@ -72,21 +76,40 @@ class InputTag extends HTMLElement {
     this._shadowRoot = this.attachShadow({ mode: "open" });
 
     this.observer = new MutationObserver(mutations => {
+      let needsTagOptionsUpdate = false;
+      let needsAutocompleteUpdate = false;
+      
       for (const mutation of mutations) {
         if (mutation.type === 'childList') {
-          // Handle child list changes (tag-option elements added/removed)
-          this.unobserve();
-          this.processTagOptions();
-          this.observe();
+          // Check if tag-option or datalist elements were added/removed
+          const hasTagOptionChanges = [...mutation.addedNodes, ...mutation.removedNodes]
+            .some(node => node.tagName === 'TAG-OPTION');
+          const hasDatalistChanges = [...mutation.addedNodes, ...mutation.removedNodes]
+            .some(node => node.tagName === 'DATALIST');
+            
+          if (hasTagOptionChanges) {
+            needsTagOptionsUpdate = true;
+          }
+          if (hasDatalistChanges) {
+            needsAutocompleteUpdate = true;
+          }
         } else if (mutation.type === 'attributes') {
           // Handle attribute changes on tag-option elements
           if (mutation.target !== this && mutation.target.tagName === 'TAG-OPTION') {
-            this.unobserve();
-            this.processTagOptions();
-            this.observe();
+            needsTagOptionsUpdate = true;
           }
-          // Note: changes to this element's attributes are handled by attributeChangedCallback
         }
+      }
+      
+      if (needsTagOptionsUpdate || needsAutocompleteUpdate) {
+        this.unobserve();
+        if (needsTagOptionsUpdate) {
+          this.processTagOptions();
+        }
+        if (needsAutocompleteUpdate && this.initialized) {
+          this.setupAutocomplete();
+        }
+        this.observe();
       }
     });
   }
@@ -106,8 +129,10 @@ class InputTag extends HTMLElement {
 
   processTagOptions() {
     if(!this._taggle || !this._taggle.tag) return
-    const values = Array.from(this.children).map(e => e.value)
-    this._taggle.tag.elements = [...this.children]
+    // Filter out datalist elements - only process tag-option elements
+    const tagOptions = Array.from(this.children).filter(e => e.tagName === 'TAG-OPTION')
+    const values = tagOptions.map(e => e.value).filter(value => value !== null && value !== undefined)
+    this._taggle.tag.elements = tagOptions
     this._taggle.tag.values = values
     this._inputPosition = this._taggle.tag.values.length;
 
@@ -172,9 +197,40 @@ class InputTag extends HTMLElement {
     if(datalistId) {
       const datalist = document.getElementById(datalistId)
       if(datalist) {
-        return [...datalist.options].map(option => option.value)
+        return [...datalist.options].map(option => option.value).filter(value => value !== null && value !== undefined)
       }
     }
+    
+    // Fall back to nested datalist
+    const nestedDatalist = this.querySelector('datalist')
+    if(nestedDatalist) {
+      return [...nestedDatalist.options].map(option => option.hasAttribute('value') ? option.value : option.textContent).filter(value => value !== null && value !== undefined)
+    }
+    
+    return []
+  }
+
+  _getOptionsWithLabels() {
+    const datalistId = this.getAttribute("list")
+    if(datalistId) {
+      const datalist = document.getElementById(datalistId)
+      if(datalist) {
+        return [...datalist.options].map(option => ({
+          value: option.value,
+          label: option.textContent || option.value
+        })).filter(item => item.value !== null && item.value !== undefined)
+      }
+    }
+    
+    // Fall back to nested datalist
+    const nestedDatalist = this.querySelector('datalist')
+    if(nestedDatalist) {
+      return [...nestedDatalist.options].map(option => ({
+        value: option.hasAttribute('value') ? option.value : option.textContent,
+        label: option.textContent || option.value
+      })).filter(item => item.value !== null && item.value !== undefined)
+    }
+    
     return []
   }
 
@@ -358,20 +414,32 @@ class InputTag extends HTMLElement {
   }
 
   setupAutocomplete() {
+    const optionsWithLabels = this._getOptionsWithLabels()
+    
     autocomplete({
       input: this._taggleInputTarget,
       container: this.autocompleteContainerTarget,
       className: "ui-menu ui-autocomplete",
       fetch: (text, update) => {
         const currentTags = this._taggle.getTagValues()
-        const suggestions = this.options.filter(tag =>
-          tag.toLowerCase().includes(text.toLowerCase()) &&
-          !currentTags.includes(tag)
+        const suggestions = optionsWithLabels.filter(option =>
+          option.label.toLowerCase().includes(text.toLowerCase()) &&
+          !currentTags.includes(option.value)
         )
+        // Store the suggestions for testing (can't assign to getter, tests read from DOM)
         update(suggestions)
       },
-      render: item => h(`<li class="ui-menu-item">${item}</li>`),
-      onSelect: item => this._taggle.add(item),
+      render: item => h(`<li class="ui-menu-item" data-value="${item.value}">${item.label}</li>`),
+      onSelect: item => {
+        // Create a tag-option element with proper value/label separation
+        const tagOption = document.createElement('tag-option')
+        tagOption.setAttribute('value', item.value)
+        tagOption.textContent = item.label
+        this.appendChild(tagOption)
+        
+        // Clear input
+        this._taggleInputTarget.value = ''
+      },
       minLength: 1,
       customize: (input, inputRect, container, maxHeight) => {
         // Position autocomplete below the input-tag container, accounting for dynamic height
@@ -656,8 +724,8 @@ class InputTag extends HTMLElement {
   handleListChange(newListId) {
     if (!this._taggle) return;
 
-    // The options getter will automatically read from the new datalist
-    // No additional action needed as autocomplete will pick up the change
+    // Re-setup autocomplete with new datalist
+    this.setupAutocomplete();
   }
 
   reinitializeTaggle() {

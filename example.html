@@ -4,38 +4,274 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Input Tag Example</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 { color: #2c3e50; }
+        h2 { color: #34495e; margin-top: 40px; }
+        h3 { color: #7f8c8d; margin-top: 25px; }
+        h4 { color: #95a5a6; }
+        p { color: #666; }
+        small {
+            display: block;
+            color: #999;
+            font-style: italic;
+            margin-top: 5px;
+            margin-bottom: 20px;
+        }
+        input-tag {
+            margin-bottom: 5px;
+            display: block;
+        }
+        .field-container {
+            margin-bottom: 25px;
+            border-left: 3px solid #e9ecef;
+            padding-left: 15px;
+        }
+        .data-display {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 8px 12px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 12px;
+            color: #495057;
+            margin-top: 5px;
+            white-space: pre-wrap;
+            min-height: 20px;
+        }
+        .data-display.has-data {
+            border-left: 3px solid #28a745;
+            background: #f8fff9;
+        }
+        .data-display.empty {
+            color: #999;
+            font-style: italic;
+        }
+        .html-display {
+            background: #fff5f5;
+            border: 1px solid #ffe0e0;
+            border-radius: 4px;
+            padding: 8px 12px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 12px;
+            color: #666;
+            margin-top: 3px;
+            white-space: pre-wrap;
+            min-height: 20px;
+        }
+        .html-display.has-data {
+            border-left: 3px solid #e74c3c;
+            background: #fdf8f8;
+        }
+        .html-display.empty {
+            color: #bbb;
+            font-style: italic;
+        }
+    </style>
 </head>
 <body>
-    <h1>@botandrose/input-tag Example</h1>
-    
-    <form>
-        <h2>Multiple Tags</h2>
-        <input-tag name="tags" multiple>
-            <tag-option value="javascript">JavaScript</tag-option>
-            <tag-option value="typescript">TypeScript</tag-option>
-        </input-tag>
-        
-        <h2>Single Tag</h2>
-        <input-tag name="category">
-            <tag-option value="frontend">Frontend</tag-option>
-        </input-tag>
-        
-        <h2>With Autocomplete</h2>
-        <input-tag name="frameworks" list="suggestions" multiple></input-tag>
-        <datalist id="suggestions">
-            <option value="react">React</option>
-            <option value="vue">Vue</option>
-            <option value="angular">Angular</option>
-            <option value="svelte">Svelte</option>
-        </datalist>
-        
-        <br><br>
-        <button type="button" onclick="showValues()">Show Values</button>
-        <button type="reset">Reset Form</button>
-    </form>
-    
-    <div id="output"></div>
-    
+    <h1>@botandrose/input-tag Examples</h1>
+    <p>Demonstrates both traditional flat value arrays and new value/label separation features.</p>
+
+
+        <h2>🆕 Value/Label Separation Examples</h2>
+        <p>These examples show tags where the displayed text is different from the form submission value (like HTML &lt;option&gt; elements).</p>
+
+        <form>
+          <div class="field-container">
+            <h3>Programming Languages with Descriptive Labels</h3>
+            <div class="html-display" data-field-html="languages"></div>
+<div class="input-wrapper">
+<input-tag name="languages" multiple>
+  <tag-option value="js">JavaScript - Dynamic scripting language</tag-option>
+  <tag-option value="ts">TypeScript - Typed JavaScript superset</tag-option>
+  <tag-option value="py">Python - High-level programming language</tag-option>
+</input-tag>
+</div>
+            <div class="data-display" data-field="languages"></div>
+            <small>Form submits: "js", "ts", "py" but displays descriptive names</small>
+        </div>
+</form>
+
+        <form>
+          <div class="field-container">
+            <h3>Single Selection with Value/Label</h3>
+            <div class="html-display" data-field-html="priority"></div>
+<div class="input-wrapper">
+<input-tag name="priority">
+  <tag-option value="1">🔥 High Priority</tag-option>
+</input-tag>
+</div>
+            <div class="data-display" data-field="priority"></div>
+            <small>Form submits: "1" but displays: "🔥 High Priority"</small>
+        </div>
+</form>
+
+        <form>
+          <div class="field-container">
+            <h3>Mixed Tags (Some with values, some text-only)</h3>
+            <div class="html-display" data-field-html="mixed"></div>
+<div class="input-wrapper">
+<input-tag name="mixed" multiple>
+  <tag-option value="urgent">⚡ Urgent Task</tag-option>
+  <tag-option value="reviewed">✅ Code Reviewed</tag-option>
+  <tag-option>Custom Note</tag-option>
+</input-tag>
+</div>
+            <div class="data-display" data-field="mixed"></div>
+            <small>Shows how value/label and text-only tags can coexist</small>
+        </div>
+</form>
+
+        <h2>🎯 Autocomplete with Value/Label Separation</h2>
+        <p>Type to search by label text, select to add with proper value/label separation.</p>
+
+        <form>
+          <div class="field-container">
+            <h3>Frameworks (with descriptive labels)</h3>
+            <div class="html-display" data-field-html="frameworks"></div>
+            <div class="input-wrapper">
+<input-tag name="frameworks" list="framework-suggestions" multiple></input-tag>
+<datalist id="framework-suggestions">
+  <option value="react">React - Component-based UI library</option>
+  <option value="vue">Vue.js - Progressive JavaScript framework</option>
+  <option value="angular">Angular - Full-featured TypeScript framework</option>
+  <option value="svelte">Svelte - Compile-time optimized framework</option>
+  <option value="solid">SolidJS - Fine-grained reactive framework</option>
+</datalist>
+            </div>
+            <div class="data-display" data-field="frameworks"></div>
+            <small>Try typing "react", "vue", "typescript", or "compile" to see label-based filtering</small>
+        </div>
+</form>
+
+        <h2>📊 Traditional Flat Value Examples</h2>
+        <p>These examples use simple string values (no value/label separation).</p>
+
+        <form>
+          <div class="field-container">
+            <h3>Simple Tags (value = label)</h3>
+            <div class="html-display" data-field-html="simple_tags"></div>
+<div class="input-wrapper">
+<input-tag name="simple_tags" multiple>
+  <tag-option>javascript</tag-option>
+  <tag-option>python</tag-option>
+  <tag-option>ruby</tag-option>
+</input-tag>
+</div>
+            <div class="data-display" data-field="simple_tags"></div>
+            <small>Traditional usage: form value equals display text</small>
+        </div>
+</form>
+
+        <form>
+          <div class="field-container">
+            <h3>Simple Autocomplete (no value/label separation)</h3>
+            <div class="html-display" data-field-html="simple_autocomplete"></div>
+            <div class="input-wrapper">
+<input-tag name="simple_autocomplete" list="simple-suggestions" multiple></input-tag>
+<datalist id="simple-suggestions">
+  <option value="html">html</option>
+  <option value="css">css</option>
+  <option value="javascript">javascript</option>
+  <option value="nodejs">nodejs</option>
+</datalist>
+            </div>
+            <div class="data-display" data-field="simple_autocomplete"></div>
+            <small>Traditional autocomplete where option value equals display text</small>
+        </div>
+</form>
+
+        <h2>🆕 Nested Datalist Examples</h2>
+        <p>These examples show nested anonymous datalist elements inside the input-tag (no external datalist required).</p>
+
+        <form>
+          <div class="field-container">
+            <h3>Nested Datalist with Autocomplete</h3>
+            <div class="html-display" data-field-html="nested_frameworks"></div>
+<div class="input-wrapper">
+<input-tag name="nested_frameworks" multiple>
+  <datalist>
+    <option value="nextjs">Next.js - React Framework</option>
+    <option value="nuxt">Nuxt.js - Vue Framework</option>
+    <option value="gatsby">Gatsby - Static Site Generator</option>
+    <option value="remix">Remix - Full Stack Web Framework</option>
+  </datalist>
+</input-tag>
+</div>
+            <div class="data-display" data-field="nested_frameworks"></div>
+            <small>Uses nested anonymous datalist - no external datalist element needed!</small>
+        </div>
+</form>
+
+        <form>
+          <div class="field-container">
+            <h3>Mixed: Predefined Tags + Nested Datalist</h3>
+            <div class="html-display" data-field-html="mixed_nested"></div>
+<div class="input-wrapper">
+<input-tag name="mixed_nested" multiple>
+  <tag-option value="html">HTML - Markup Language</tag-option>
+  <tag-option value="css">CSS - Styling Language</tag-option>
+  <datalist>
+    <option value="sass">Sass - CSS Preprocessor</option>
+    <option value="less">Less - CSS Preprocessor</option>
+    <option value="stylus">Stylus - Expressive CSS</option>
+  </datalist>
+</input-tag>
+</div>
+            <div class="data-display" data-field="mixed_nested"></div>
+            <small>Shows predefined tags plus nested datalist autocomplete options</small>
+        </div>
+</form>
+
+        <h2>🔧 Advanced Examples</h2>
+
+        <form>
+          <div class="field-container">
+            <h3>Country Codes with Full Names</h3>
+            <div class="html-display" data-field-html="countries"></div>
+            <div class="input-wrapper">
+<input-tag name="countries" list="country-suggestions" multiple></input-tag>
+<datalist id="country-suggestions">
+  <option value="US">🇺🇸 United States</option>
+  <option value="CA">🇨🇦 Canada</option>
+  <option value="UK">🇬🇧 United Kingdom</option>
+  <option value="DE">🇩🇪 Germany</option>
+  <option value="JP">🇯🇵 Japan</option>
+  <option value="AU">🇦🇺 Australia</option>
+</datalist>
+            </div>
+            <div class="data-display" data-field="countries"></div>
+            <small>Form submits ISO country codes but displays full country names with flags</small>
+        </div>
+</form>
+
+        <form>
+          <div class="field-container">
+            <h3>Status with Color Indicators</h3>
+            <div class="html-display" data-field-html="status"></div>
+            <div class="input-wrapper">
+<input-tag name="status" list="status-suggestions"></input-tag>
+<datalist id="status-suggestions">
+  <option value="active">🟢 Active - Currently running</option>
+  <option value="pending">🟡 Pending - Waiting for approval</option>
+  <option value="inactive">🔴 Inactive - Not currently active</option>
+  <option value="maintenance">🔧 Maintenance - Under maintenance</option>
+</datalist>
+            </div>
+            <div class="data-display" data-field="status"></div>
+            <small>Visual status indicators with detailed descriptions</small>
+        </div>
+</form>
+
+
+
     <script type="importmap">
         {
             "imports": {
@@ -47,28 +283,48 @@
     </script>
     <script type="module">import 'input-tag'</script>
     <script>
-        function showValues() {
-            const output = document.getElementById('output');
-            const formData = new FormData(document.querySelector('form'));
-            let html = '<h3>Form Values:</h3><ul>';
-            for (let [key, value] of formData.entries()) {
-                html += `<li><strong>${key}:</strong> ${value}</li>`;
-            }
-            html += '</ul>';
-            output.innerHTML = html;
+        // Function to update live FormData and HTML displays
+        function updateFieldDisplay(inputTag) {
+            const fieldName = inputTag.name;
+            const dataDisplay = document.querySelector(`[data-field="${fieldName}"]`);
+            const htmlDisplay = document.querySelector(`[data-field-html="${fieldName}"]`);
+            const form = inputTag.closest('form');
+
+            const formData = new FormData(form);
+            const isMultiple = inputTag.hasAttribute('multiple');
+            const value = isMultiple ? formData.getAll(fieldName) : formData.get(fieldName);
+            dataDisplay.textContent = `${fieldName}: ${JSON.stringify(value)}`;
+            dataDisplay.className = 'data-display has-data'
+
+            htmlDisplay.textContent = inputTag.parentNode.innerHTML.trim();
+            htmlDisplay.className = 'html-display has-data';
         }
-        
-        // Listen for changes
+
+
+        // Update all field displays
+        function updateAllDisplays() {
+            document.querySelectorAll('input-tag').forEach(updateFieldDisplay);
+        }
+
+        // Listen for changes and update displays
         document.addEventListener('change', (e) => {
             if (e.target.tagName === 'INPUT-TAG') {
-                console.log('Tag changed:', e.target.name, e.target.value);
+                updateFieldDisplay(e.target);
             }
         });
-        
+
         document.addEventListener('update', (e) => {
             if (e.target.tagName === 'INPUT-TAG') {
-                console.log('Tag updated:', e.detail);
+                setTimeout(() => updateFieldDisplay(e.target), 10);
             }
+        });
+
+        window.addEventListener('load', () => {
+            updateAllDisplays();
+        });
+
+        document.addEventListener('reset', () => {
+            setTimeout(updateAllDisplays, 100);
         });
     </script>
 </body>
