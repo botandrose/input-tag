@@ -2,6 +2,8 @@
 
 A declarative, framework-agnostic custom element for tag input with optional autocomplete functionality.
 
+Built with appreciation on the excellent foundation of [Taggle.js](https://github.com/okcoker/taggle.js) by Sean Coker.
+
 ## Installation
 
 ```bash
