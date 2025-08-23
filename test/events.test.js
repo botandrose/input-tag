@@ -47,12 +47,24 @@ describe('Events', () => {
       expect(eventFired).to.be.true
     })
 
-    it('should fire change event when value is set programmatically', async () => {
+    it('should fire change event when array value is set programmatically in multiple mode', async () => {
       const inputTag = await setupInputTag('<input-tag name="tags" multiple></input-tag>')
 
       const eventPromise = expectEventToFire(inputTag, 'change')
 
       inputTag.value = ['programmatic-tag']
+      await waitForUpdate()
+
+      const { eventFired } = await eventPromise
+      expect(eventFired).to.be.true
+    })
+
+    it('should fire change event when string value is set programmatically in single mode', async () => {
+      const inputTag = await setupInputTag('<input-tag name="tag"></input-tag>')
+
+      const eventPromise = expectEventToFire(inputTag, 'change')
+
+      inputTag.value = 'programmatic-tag'
       await waitForUpdate()
 
       const { eventFired } = await eventPromise
@@ -93,7 +105,7 @@ describe('Events', () => {
       expect(changeEventFired).to.be.false
     })
 
-    it('should not fire change event when values do not actually change', async () => {
+    it('should not fire change event when array values do not actually change in multiple mode', async () => {
       const inputTag = await setupInputTag(`
         <input-tag name="tags" multiple>
           <tag-option value="existing">Existing</tag-option>
@@ -107,6 +119,25 @@ describe('Events', () => {
 
       // Set the same value again
       inputTag.value = ['existing']
+      await waitForUpdate()
+
+      expect(changeEventFired).to.be.false
+    })
+
+    it('should not fire change event when string value does not actually change in single mode', async () => {
+      const inputTag = await setupInputTag(`
+        <input-tag name="tag">
+          <tag-option value="existing">Existing</tag-option>
+        </input-tag>
+      `)
+
+      let changeEventFired = false
+      inputTag.addEventListener('change', () => {
+        changeEventFired = true
+      })
+
+      // Set the same value again
+      inputTag.value = 'existing'
       await waitForUpdate()
 
       expect(changeEventFired).to.be.false

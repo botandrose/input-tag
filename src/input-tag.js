@@ -151,10 +151,25 @@ class InputTag extends HTMLElement {
   }
 
   get value() {
-    return this._internals.value;
+    const internalValue = this._internals.value;
+    if (this.hasAttribute('multiple')) {
+      return internalValue; // Return array for multiple mode
+    } else {
+      return internalValue.length > 0 ? internalValue[0] : ''; // Return string for single mode
+    }
   }
 
-  set value(values) {
+  set value(input) {
+    // Convert input to array format for internal storage
+    let values;
+    if (Array.isArray(input)) {
+      values = input;
+    } else if (typeof input === 'string') {
+      values = input === '' ? [] : [input];
+    } else {
+      values = [];
+    }
+
     const oldValues = this._internals.value;
     this._internals.value = values;
 

@@ -54,7 +54,7 @@ Then use it in your HTML:
 
 ### Properties
 
-- `value`: Get/set tag values as array
+- `value`: Get/set tag values - returns **array** when `multiple`, **string** when single mode
 - `tags`: Get current tag values as array (read-only)
 - `options`: Get available autocomplete options from datalist
 - `form`: Reference to associated form element
@@ -87,26 +87,37 @@ Then use it in your HTML:
 ### JavaScript API Example
 
 ```javascript
-const inputTag = document.querySelector('input-tag')
+// Multiple mode
+const multipleTag = document.querySelector('input-tag[multiple]')
 
 // Add tags
-inputTag.add('react')
-inputTag.add(['vue', 'angular'])
-
-// Check and manipulate tags
-if (inputTag.has('react')) {
-  inputTag.remove('react')
-}
+multipleTag.add('react')
+multipleTag.add(['vue', 'angular'])
 
 // Get current tags
-console.log(inputTag.tags) // ['vue', 'angular']
+console.log(multipleTag.value) // ['react', 'vue', 'angular'] - returns array
+console.log(multipleTag.tags)  // ['react', 'vue', 'angular'] - also array
 
 // Set all tags at once
-inputTag.value = ['new', 'tags']
+multipleTag.value = ['new', 'tags'] // accepts array
+
+// Single mode
+const singleTag = document.querySelector('input-tag:not([multiple])')
+
+// Set single tag
+singleTag.value = 'selected-tag' // accepts string
+
+// Get current tag
+console.log(singleTag.value) // 'selected-tag' - returns string
+console.log(singleTag.tags)  // ['selected-tag'] - always array
+
+// Backward compatibility: arrays still work in single mode
+singleTag.value = ['another-tag'] // accepts array, uses first item
+console.log(singleTag.value) // 'another-tag' - still returns string
 
 // Form validation
-if (!inputTag.checkValidity()) {
-  inputTag.reportValidity()
+if (!singleTag.checkValidity()) {
+  singleTag.reportValidity()
 }
 ```
 

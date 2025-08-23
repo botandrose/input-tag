@@ -243,7 +243,7 @@ describe('API Methods', () => {
 
   describe('Value Getter and Setter', () => {
     describe('Value Getter', () => {
-      it('should return array of tag values', async () => {
+      it('should return array of tag values for multiple mode', async () => {
         const inputTag = await setupInputTag(`
           <input-tag name="tags" multiple>
             <tag-option value="tag1">Tag 1</tag-option>
@@ -254,13 +254,29 @@ describe('API Methods', () => {
         expect(inputTag.value).to.deep.equal(['tag1', 'tag2'])
       })
 
-      it('should return empty array for no tags', async () => {
+      it('should return empty array for no tags in multiple mode', async () => {
         const inputTag = await setupInputTag('<input-tag name="tags" multiple></input-tag>')
 
         expect(inputTag.value).to.deep.equal([])
       })
 
-      it('should return current values after modifications', async () => {
+      it('should return string value for single mode with tag', async () => {
+        const inputTag = await setupInputTag(`
+          <input-tag name="tag">
+            <tag-option value="single-tag">Single Tag</tag-option>
+          </input-tag>
+        `)
+
+        expect(inputTag.value).to.equal('single-tag')
+      })
+
+      it('should return empty string for no tags in single mode', async () => {
+        const inputTag = await setupInputTag('<input-tag name="tag"></input-tag>')
+
+        expect(inputTag.value).to.equal('')
+      })
+
+      it('should return current values after modifications in multiple mode', async () => {
         const inputTag = await setupInputTag(`
           <input-tag name="tags" multiple>
             <tag-option value="initial">Initial</tag-option>
@@ -279,10 +295,30 @@ describe('API Methods', () => {
 
         expect(inputTag.value).to.deep.equal(['added'])
       })
+
+      it('should return current value after modifications in single mode', async () => {
+        const inputTag = await setupInputTag(`
+          <input-tag name="tag">
+            <tag-option value="initial">Initial</tag-option>
+          </input-tag>
+        `)
+
+        expect(inputTag.value).to.equal('initial')
+
+        inputTag.remove('initial')
+        await waitForUpdate()
+
+        expect(inputTag.value).to.equal('')
+
+        inputTag.add('replacement')
+        await waitForUpdate()
+
+        expect(inputTag.value).to.equal('replacement')
+      })
     })
 
     describe('Value Setter', () => {
-      it('should set tag values from array', async () => {
+      it('should set tag values from array in multiple mode', async () => {
         const inputTag = await setupInputTag('<input-tag name="tags" multiple></input-tag>')
 
         inputTag.value = ['new1', 'new2', 'new3']
@@ -290,9 +326,21 @@ describe('API Methods', () => {
 
         expect(getTagElements(inputTag)).to.have.length(3)
         expect(getTagValues(inputTag)).to.deep.equal(['new1', 'new2', 'new3'])
+        expect(inputTag.value).to.deep.equal(['new1', 'new2', 'new3'])
       })
 
-      it('should replace existing tags when setting value', async () => {
+      it('should set tag value from string in single mode', async () => {
+        const inputTag = await setupInputTag('<input-tag name="tag"></input-tag>')
+
+        inputTag.value = 'single-tag'
+        await waitForUpdate()
+
+        expect(getTagElements(inputTag)).to.have.length(1)
+        expect(getTagValues(inputTag)).to.deep.equal(['single-tag'])
+        expect(inputTag.value).to.equal('single-tag')
+      })
+
+      it('should replace existing tags when setting array value in multiple mode', async () => {
         const inputTag = await setupInputTag(`
           <input-tag name="tags" multiple>
             <tag-option value="old1">Old 1</tag-option>
@@ -305,9 +353,25 @@ describe('API Methods', () => {
 
         expect(getTagElements(inputTag)).to.have.length(2)
         expect(getTagValues(inputTag)).to.deep.equal(['replacement1', 'replacement2'])
+        expect(inputTag.value).to.deep.equal(['replacement1', 'replacement2'])
       })
 
-      it('should clear tags when setting empty array', async () => {
+      it('should replace existing tag when setting string value in single mode', async () => {
+        const inputTag = await setupInputTag(`
+          <input-tag name="tag">
+            <tag-option value="old">Old</tag-option>
+          </input-tag>
+        `)
+
+        inputTag.value = 'replacement'
+        await waitForUpdate()
+
+        expect(getTagElements(inputTag)).to.have.length(1)
+        expect(getTagValues(inputTag)).to.deep.equal(['replacement'])
+        expect(inputTag.value).to.equal('replacement')
+      })
+
+      it('should clear tags when setting empty array in multiple mode', async () => {
         const inputTag = await setupInputTag(`
           <input-tag name="tags" multiple>
             <tag-option value="will-be-cleared">Will Be Cleared</tag-option>
@@ -319,9 +383,36 @@ describe('API Methods', () => {
 
         expect(getTagElements(inputTag)).to.have.length(0)
         expect(getTagValues(inputTag)).to.deep.equal([])
+        expect(inputTag.value).to.deep.equal([])
       })
 
-      it('should handle single value in single-tag mode', async () => {
+      it('should clear tag when setting empty string in single mode', async () => {
+        const inputTag = await setupInputTag(`
+          <input-tag name="tag">
+            <tag-option value="will-be-cleared">Will Be Cleared</tag-option>
+          </input-tag>
+        `)
+
+        inputTag.value = ''
+        await waitForUpdate()
+
+        expect(getTagElements(inputTag)).to.have.length(0)
+        expect(getTagValues(inputTag)).to.deep.equal([])
+        expect(inputTag.value).to.equal('')
+      })
+
+      it('should handle string value in single mode', async () => {
+        const inputTag = await setupInputTag('<input-tag name="tag"></input-tag>')
+
+        inputTag.value = 'single-value'
+        await waitForUpdate()
+
+        expect(getTagElements(inputTag)).to.have.length(1)
+        expect(getTagValues(inputTag)).to.deep.equal(['single-value'])
+        expect(inputTag.value).to.equal('single-value')
+      })
+
+      it('should handle array value in single mode (for backward compatibility)', async () => {
         const inputTag = await setupInputTag('<input-tag name="tag"></input-tag>')
 
         inputTag.value = ['single-value']
@@ -329,9 +420,10 @@ describe('API Methods', () => {
 
         expect(getTagElements(inputTag)).to.have.length(1)
         expect(getTagValues(inputTag)).to.deep.equal(['single-value'])
+        expect(inputTag.value).to.equal('single-value')
       })
 
-      it('should trigger change event when value is set programmatically', async () => {
+      it('should trigger change event when array value is set programmatically in multiple mode', async () => {
         const inputTag = await setupInputTag('<input-tag name="tags" multiple></input-tag>')
 
         let changeEventFired = false
@@ -345,7 +437,21 @@ describe('API Methods', () => {
         expect(changeEventFired).to.be.true
       })
 
-      it('should not trigger change event when value is set to same value', async () => {
+      it('should trigger change event when string value is set programmatically in single mode', async () => {
+        const inputTag = await setupInputTag('<input-tag name="tag"></input-tag>')
+
+        let changeEventFired = false
+        inputTag.addEventListener('change', () => {
+          changeEventFired = true
+        })
+
+        inputTag.value = 'programmatic'
+        await waitForUpdate()
+
+        expect(changeEventFired).to.be.true
+      })
+
+      it('should not trigger change event when array value is set to same value in multiple mode', async () => {
         const inputTag = await setupInputTag(`
           <input-tag name="tags" multiple>
             <tag-option value="same">Same</tag-option>
@@ -358,6 +464,24 @@ describe('API Methods', () => {
         })
 
         inputTag.value = ['same']
+        await waitForUpdate()
+
+        expect(changeEventFired).to.be.false
+      })
+
+      it('should not trigger change event when string value is set to same value in single mode', async () => {
+        const inputTag = await setupInputTag(`
+          <input-tag name="tag">
+            <tag-option value="same">Same</tag-option>
+          </input-tag>
+        `)
+
+        let changeEventFired = false
+        inputTag.addEventListener('change', () => {
+          changeEventFired = true
+        })
+
+        inputTag.value = 'same'
         await waitForUpdate()
 
         expect(changeEventFired).to.be.false
