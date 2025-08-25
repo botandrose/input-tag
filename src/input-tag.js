@@ -19,7 +19,7 @@ class TagOption extends HTMLElement {
           display: inline-flex;
           align-items: center;
           float: none;
-          font-size: 1.25em;
+          font-size: 14px;
           line-height: 1;
           min-height: 32px;
           color: #fff;
@@ -32,7 +32,7 @@ class TagOption extends HTMLElement {
           z-index: 1;
           border: none;
           background: none;
-          font-size: 1.4em;
+          font-size: 20px;
           display: inline-block;
           color: rgba(255, 255, 255, 0.6);
           right: 10px;
@@ -285,14 +285,14 @@ class InputTag extends HTMLElement {
         }
         input {
           display: block;
-          height: 32px;
+          height: 38px;
           float: none;
           margin: 0;
           padding-left: 10px !important;
           padding-right: 30px !important;
           width: auto !important;
           min-width: 70px;
-          font-size: 1.25em;
+          font-size: 14px;
           width: 100%;
           line-height: 2;
           padding: 0 0 0 10px;
@@ -305,11 +305,11 @@ class InputTag extends HTMLElement {
           color: #333;
         }
         button {
-          width: 30px;
+          width: 38px;
           text-align: center;
-          line-height: 30px;
+          line-height: 36px;
           border: 1px solid #e0e0e0;
-          font-size: 2em;
+          font-size: 20px;
           color: #666;
           position: absolute !important;
           z-index: 10;
@@ -341,7 +341,7 @@ class InputTag extends HTMLElement {
           flex-wrap: wrap;
           background: #fff;
           list-style: none;
-          font-size: 1.25em;
+          font-size: 14px;
           min-width: 200px;
         }
         .ui-menu .ui-menu-item{
