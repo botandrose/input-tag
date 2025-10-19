@@ -124,8 +124,17 @@ class InputTag extends HTMLElement {
 
   processTagOptions() {
     if(!this._taggle || !this._taggle.tag) return
-    const tagOptions = Array.from(this.children).filter(e => e.tagName === 'TAG-OPTION')
-    const values = tagOptions.map(e => e.value).filter(value => value !== null && value !== undefined)
+    let tagOptions = Array.from(this.children).filter(e => e.tagName === 'TAG-OPTION')
+    let values = tagOptions.map(e => e.value).filter(value => value !== null && value !== undefined)
+
+    // Enforce maxTags constraint for single mode
+    if (!this.multiple && values.length > 1) {
+      // Remove excess tag-options from DOM (keep only the first one)
+      tagOptions.slice(1).forEach(el => el.remove())
+      tagOptions = tagOptions.slice(0, 1)
+      values = values.slice(0, 1)
+    }
+
     this._taggle.tag.elements = tagOptions
     this._taggle.tag.values = values
     this._inputPosition = this._taggle.tag.values.length;
@@ -140,6 +149,9 @@ class InputTag extends HTMLElement {
 
     // Update internal value to match
     this.updateValue();
+
+    // Ensure input visibility is updated when tags change via DOM
+    this.updateInputVisibility();
   }
 
   get form() {
@@ -150,9 +162,13 @@ class InputTag extends HTMLElement {
     return this.getAttribute("name");
   }
 
+  get multiple() {
+    return this.hasAttribute('multiple');
+  }
+
   get value() {
     const internalValue = this._internals.value;
-    if (this.hasAttribute('multiple')) {
+    if (this.multiple) {
       return internalValue; // Return array for multiple mode
     } else {
       return internalValue.length > 0 ? internalValue[0] : ''; // Return string for single mode
@@ -177,7 +193,7 @@ class InputTag extends HTMLElement {
     values.forEach(value => formData.append(this.name, value));
     // For single mode, append empty string when no values (like standard HTML inputs)
     // For multiple mode, leave empty (like standard HTML multiple selects)
-    if (values.length === 0 && !this.hasAttribute('multiple')) {
+    if (values.length === 0 && !this.multiple) {
       formData.append(this.name, "");
     }
     this._internals.setFormValue(formData);
@@ -383,7 +399,6 @@ class InputTag extends HTMLElement {
     this.inputTarget = this.shadowRoot.querySelector("#inputTarget");
 
     this.required = this.hasAttribute("required")
-    this.multiple = this.hasAttribute("multiple")
 
     const maxTags = this.multiple ? undefined : 1
     const placeholder = this.inputTarget.getAttribute("placeholder")
@@ -447,6 +462,12 @@ class InputTag extends HTMLElement {
       },
       render: item => h(`<li class="ui-menu-item" data-value="${item.value}">${item.label}</li>`),
       onSelect: item => {
+        // Prevent adding multiple tags in single mode
+        if (!this.multiple && this._taggle.getTagValues().length > 0) {
+          this._taggleInputTarget.value = ''
+          return
+        }
+
         // Create a tag-option element with proper value/label separation
         const tagOption = document.createElement('tag-option')
         tagOption.setAttribute('value', item.value)
@@ -584,7 +605,7 @@ class InputTag extends HTMLElement {
     values.forEach(value => formData.append(this.name, value));
     // For single mode, append empty string when no values (like standard HTML inputs)
     // For multiple mode, leave empty (like standard HTML multiple selects)
-    if (values.length === 0 && !this.hasAttribute('multiple')) {
+    if (values.length === 0 && !this.multiple) {
       formData.append(this.name, "");
     }
     this._internals.setFormValue(formData);
@@ -647,10 +668,9 @@ class InputTag extends HTMLElement {
   updateInputVisibility() {
     if (!this._taggleInputTarget || !this.buttonTarget) return;
 
-    const isMultiple = this.hasAttribute('multiple');
     const hasTags = this._taggle && this._taggle.getTagValues().length > 0;
 
-    if (isMultiple) {
+    if (this.multiple) {
       // Multiple mode: always show input and button
       this._taggleInputTarget.style.display = '';
       this.buttonTarget.style.display = '';
@@ -718,9 +738,6 @@ class InputTag extends HTMLElement {
 
   handleMultipleChange(isMultiple) {
     if (!this._taggle) return;
-
-    // Update the internal multiple state
-    this.multiple = isMultiple;
 
     // Get current tags
     const currentTags = this._taggle.getTagValues();
@@ -820,7 +837,7 @@ class InputTag extends HTMLElement {
     values.forEach(value => formData.append(this.name, value));
     // For single mode, append empty string when no values (like standard HTML inputs)
     // For multiple mode, leave empty (like standard HTML multiple selects)
-    if (values.length === 0 && !this.hasAttribute('multiple')) {
+    if (values.length === 0 && !this.multiple) {
       formData.append(this.name, "");
     }
     this._internals.setFormValue(formData);

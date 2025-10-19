@@ -542,4 +542,74 @@ describe('Autocomplete', () => {
       expect(updateEvent.detail.isNew).to.be.true
     })
   })
+
+  describe('Autocomplete in Single Mode', () => {
+    // Helper to simulate autocomplete selection behavior
+    function simulateAutocompleteSelection(inputTag, value, label) {
+      // Autocomplete onSelect directly creates and appends tag-option element
+      const tagOption = document.createElement('tag-option')
+      tagOption.setAttribute('value', value)
+      tagOption.textContent = label
+      inputTag.appendChild(tagOption)
+      inputTag._taggleInputTarget.value = ''
+    }
+
+    it('should hide input after selecting first autocomplete option in single mode', async () => {
+      document.body.innerHTML = `
+        <input-tag name="status" list="suggestions"></input-tag>
+        <datalist id="suggestions">
+          <option value="option1">Option 1</option>
+          <option value="option2">Option 2</option>
+          <option value="option3">Option 3</option>
+        </datalist>
+      `
+      const inputTag = document.querySelector('input-tag')
+      await waitForBasicInitialization(inputTag)
+
+      // Initially, input should be visible (no tags)
+      const input = inputTag._taggleInputTarget
+      const button = inputTag.buttonTarget
+
+      expect(input.style.display).to.not.equal('none')
+      expect(button.style.display).to.not.equal('none')
+
+      // Select first option from autocomplete (simulating actual autocomplete behavior)
+      simulateAutocompleteSelection(inputTag, 'option1', 'Option 1')
+      await waitForUpdate()
+
+      // Input should now be hidden (single mode with one tag)
+      expect(input.style.display).to.equal('none')
+      expect(button.style.display).to.equal('none')
+      expect(getTagElements(inputTag)).to.have.length(1)
+      expect(getTagValues(inputTag)).to.deep.equal(['option1'])
+    })
+
+    it('should prevent adding multiple tags via autocomplete in single mode', async () => {
+      document.body.innerHTML = `
+        <input-tag name="status" list="suggestions"></input-tag>
+        <datalist id="suggestions">
+          <option value="option1">Option 1</option>
+          <option value="option2">Option 2</option>
+          <option value="option3">Option 3</option>
+        </datalist>
+      `
+      const inputTag = document.querySelector('input-tag')
+      await waitForBasicInitialization(inputTag)
+
+      // Select first option (simulating actual autocomplete behavior)
+      simulateAutocompleteSelection(inputTag, 'option1', 'Option 1')
+      await waitForUpdate()
+
+      expect(getTagElements(inputTag)).to.have.length(1)
+      expect(getTagValues(inputTag)).to.deep.equal(['option1'])
+
+      // Try to select second option - should fail in single mode
+      simulateAutocompleteSelection(inputTag, 'option2', 'Option 2')
+      await waitForUpdate()
+
+      // Should still only have one tag (the first one)
+      expect(getTagElements(inputTag)).to.have.length(1)
+      expect(getTagValues(inputTag)).to.deep.equal(['option1'])
+    })
+  })
 })
